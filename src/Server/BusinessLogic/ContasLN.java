@@ -1,17 +1,21 @@
 package Server.BusinessLogic;
 
-import Server.BusinessLogic.Excecoes.UsernameExistente;
+import Server.BusinessLogic.Excecoes.UsernameExistenteException;
+import Server.BusinessLogic.Excecoes.UsernameNaoExistenteException;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class ContasLN {
     private Map<String, Utilizador> contas;
-    private Lock l = new ReentrantLock();
+    private ReadWriteLock rwl = new ReentrantReadWriteLock();
+    private Lock rl = rwl.readLock();
+    private Lock wl = rwl.writeLock();
 
     public ContasLN() {
         contas = new HashMap<>();
@@ -23,32 +27,26 @@ public class ContasLN {
         contas.put(u3.username, u3);
     }
 
-    public void registarUtilizador(String username, String pwd) throws UsernameExistente {
-        l.lock();
+    public void registarUtilizador(String username, String pwd) throws UsernameExistenteException {
+        wl.lock();
         Collection<Utilizador> contasValues = contas.values();
 
-        for(Utilizador u : contasValues)
-            u.l.lock();
-
-        l.unlock();
-
         try {
-            if (contas.containsKey(username)) throw new UsernameExistente("Username " + username + "já existente");
+            if (contas.containsKey(username)) throw new UsernameExistenteException("Username " + username + "já existente");
             Utilizador u = new Utilizador(username, pwd);
             contas.put(username, u);
         } finally {
-            for(Utilizador u : contasValues)
-                u.l.unlock();
+            wl.unlock();
         }
     }
 
-    public boolean validarUtilizador(String username, String pwd) {
-        l.lock();
+    public boolean validarUtilizador(String username, String pwd) throws UsernameNaoExistenteException {
+        rl.lock();
         Utilizador u = contas.get(username);
         if (u != null) u.l.lock();
-        l.unlock();
+        rl.unlock();
 
-        if (u == null) return false;
+        if (u == null) throw new UsernameNaoExistenteException();
         else {
             try {
                 return u.password.equals(pwd);
@@ -56,6 +54,23 @@ public class ContasLN {
                 u.l.unlock();
             }
         }
+    }
+
+    public boolean admin(String username) throws UsernameNaoExistenteException {
+        rl.lock();
+        Utilizador u = contas.get(username);
+        if (u != null) u.l.lock();
+        rl.unlock();
+
+        if (u == null) throw new UsernameNaoExistenteException();
+        else {
+            try {
+                return u instanceof Admnistrador;
+            } finally {
+                u.l.unlock();
+            }
+        }
+
     }
 
 
