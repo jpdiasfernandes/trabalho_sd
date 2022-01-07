@@ -20,13 +20,14 @@ public class TaggedConnection {
         }
     }
 
-    public Frame receive(){
+    public Reply receive(){
         try {
             Short tag = dis.readShort();
-            int frameSize = dis.readInt();
-            byte[] frameData = new byte[frameSize];
-            dis.readFully(frameData);
-            return new Frame(tag,frameSize,frameData);
+            byte error = dis.readByte();
+            int dataSize = dis.readInt();
+            byte[] data = new byte[dataSize];
+            dis.readFully(data);
+            return new Reply(tag,error,dataSize,data);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -34,18 +35,14 @@ public class TaggedConnection {
         return null;
     }
 
-    public void send(Short tag, Frame frame){
-        //lock.writeLock().lock();
-      //  try{
-            try {
-                this.dos.writeShort(tag);
-                this.dos.writeInt(frame.getSize());
-                this.dos.write(frame.getData());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-       // }finally {
-       //     lock.writeLock().unlock();
-       // }
+    public void send(Short tag, Request request){
+        try {
+            this.dos.writeShort(tag);
+            this.dos.writeByte(request.getOpcode());
+            this.dos.writeInt(request.getSize());
+            this.dos.write(request.getData());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

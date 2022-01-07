@@ -1,10 +1,10 @@
 package client.business;
 
-import client.business.Connection.Frame;
+import client.business.Connection.Reply;
+import client.business.Connection.Request;
 import client.business.Exceptions.*;
 
 import java.io.ByteArrayOutputStream;
-import java.net.InetAddress;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -20,12 +20,10 @@ public class AirGroup11Stub implements IAirGroup11 {
         baos.writeBytes(password.getBytes(StandardCharsets.UTF_8));
 
         byte[] data = baos.toByteArray();
-        int size = data.length;
 
-        Frame request = new Frame(size,data);
-        Frame reply = demultiplexer.service(request);
+        Request request = new Request((byte) 0x0,data.length,data);
+        Reply reply = demultiplexer.service(request);
         // deserializar o array de bytes de acordo com a mensagem de resposta do register
-        reply.getData();
     }
 
     @Override

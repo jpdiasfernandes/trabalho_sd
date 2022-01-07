@@ -1,10 +1,10 @@
 package client.business;
 
-import client.business.Connection.Frame;
+import client.business.Connection.Reply;
+import client.business.Connection.Request;
 import client.business.Connection.TaggedConnection;
 
 import java.io.*;
-import java.net.InetAddress;
 import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
@@ -14,7 +14,7 @@ import java.util.concurrent.locks.ReentrantLock;
 public class Demultiplexer implements Runnable{
     private Socket socket;
     private ReentrantLock l = new ReentrantLock();
-    private Map<Short, Frame> replies = new HashMap();
+    private Map<Short, Reply> replies = new HashMap();
     private Map<Short, Condition> conditions = new HashMap<>();
     private TaggedConnection tagged;
     // controlador de TAG's
@@ -35,7 +35,7 @@ public class Demultiplexer implements Runnable{
             // read the Frame from Socket
             var reply = tagged.receive();
             // transparência
-            if (reply instanceof Frame){
+            if (reply instanceof Reply){
                 replies.put(reply.getTag(),reply);
                 conditions.get(reply.getTag()).signal();
             }else{
@@ -44,7 +44,7 @@ public class Demultiplexer implements Runnable{
         }
     }
 
-    public Frame service(Frame request){
+    public Reply service(Request request){
         Short tagSend;
         try{
             l.lock();
@@ -57,7 +57,7 @@ public class Demultiplexer implements Runnable{
             l.unlock();
         }
 
-        Frame reply = null;
+        Reply reply = null;
         while (reply == null){
             try {
                 conditions.get(tagSend).await();
