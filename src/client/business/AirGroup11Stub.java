@@ -55,14 +55,12 @@ public class AirGroup11Stub implements IAirGroup11 {
     }
 
     @Override
-    public void insertFlight(String origin, String dest, Short capacity) throws InsertFlightInvalidException {
-        Auth auth = Auth.getInstance();
-
+    public void insertFlight(String token, String origin, String dest, Short capacity) throws InsertFlightInvalidException {
         Flight flight = new Flight(origin,dest,capacity);
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
-        baos.writeBytes(auth.getToken().getBytes(StandardCharsets.UTF_8));
+        baos.writeBytes(token.getBytes(StandardCharsets.UTF_8));
         baos.writeBytes(flight.serialize());
 
         Request request = new Request((byte) 0x2,
@@ -76,16 +74,14 @@ public class AirGroup11Stub implements IAirGroup11 {
     }
 
     @Override
-    public void cancelDay(LocalDateTime day) throws CancelDayInvalidException {
-        Auth auth = Auth.getInstance();
-
+    public void cancelDay(String token, LocalDateTime day) throws CancelDayInvalidException {
         String format = "MM/dd/yyy";
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern(format, Locale.US);
         String dateFormatted = day.format(dateFormatter);
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
-        baos.writeBytes(auth.getToken().getBytes(StandardCharsets.UTF_8));
+        baos.writeBytes(token.getBytes(StandardCharsets.UTF_8));
         baos.writeBytes(dateFormatted.getBytes(StandardCharsets.UTF_8));
 
         Request request = new Request((byte) 0x3,
@@ -102,8 +98,7 @@ public class AirGroup11Stub implements IAirGroup11 {
      *  @returns RESERVE CODE
      */
     @Override
-    public String reserveTravel(LocalDateTime start, LocalDateTime end, List<String> places) throws ReserveTravelInvalidException {
-        Auth auth = Auth.getInstance();
+    public String reserveTravel(String token, LocalDateTime start, LocalDateTime end, List<String> places) throws ReserveTravelInvalidException {
         String format = "MM/dd/yyy";
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern(format, Locale.US);
 
@@ -114,7 +109,7 @@ public class AirGroup11Stub implements IAirGroup11 {
         DataOutputStream dos = new DataOutputStream(baos);
 
         try {
-            dos.writeUTF(auth.getToken());
+            dos.writeUTF(token);
             dos.writeUTF(startDateFormatted);
             dos.writeUTF(endDateFormatted);
 
@@ -143,11 +138,9 @@ public class AirGroup11Stub implements IAirGroup11 {
     }
 
     @Override
-    public void cancelReserve(String reserveCod) throws ReserveCancelException {
-        Auth auth = Auth.getInstance();
-
+    public void cancelReserve(String token, String reserveCod) throws ReserveCancelException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        baos.writeBytes(auth.getToken().getBytes(StandardCharsets.UTF_8));
+        baos.writeBytes(token.getBytes(StandardCharsets.UTF_8));
         baos.writeBytes(reserveCod.getBytes(StandardCharsets.UTF_8));
 
         Request request = new Request((byte) 0x5,
@@ -161,10 +154,9 @@ public class AirGroup11Stub implements IAirGroup11 {
     }
 
     @Override
-    public List<Flight> getAllFlights() throws GetFlightsException {
-        Auth auth = Auth.getInstance();
+    public List<Flight> getAllFlights(String token) throws GetFlightsException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        baos.writeBytes(auth.getToken().getBytes(StandardCharsets.UTF_8));
+        baos.writeBytes(token.getBytes(StandardCharsets.UTF_8));
 
         Request request = new Request((byte) 0x6,
                 baos.toByteArray().length,
@@ -194,12 +186,10 @@ public class AirGroup11Stub implements IAirGroup11 {
     }
 
     @Override
-    public List<Route> getRoutes(String orig, String dest) throws GetRoutesException {
-        Auth auth = Auth.getInstance();
-
+    public List<Route> getRoutes(String token, String orig, String dest) throws GetRoutesException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
-        baos.writeBytes(auth.getToken().getBytes(StandardCharsets.UTF_8));
+        baos.writeBytes(token.getBytes(StandardCharsets.UTF_8));
         baos.writeBytes(orig.getBytes(StandardCharsets.UTF_8));
         baos.writeBytes(dest.getBytes(StandardCharsets.UTF_8));
 
