@@ -15,6 +15,18 @@ public class Route {
         route.add(f);
     }
 
+    public Route(List<Flight> route) {
+        List<Flight> newRoute = new ArrayList<>();
+        for (Flight flight: route){
+            newRoute.add(flight);
+        }
+        this.route = newRoute;
+    }
+
+    public Route clone(){
+        return new Route(this.route);
+    }
+
     public List<Flight> getRoute(){
         return route.stream().map(Flight::clone).collect(Collectors.toList());
     }
