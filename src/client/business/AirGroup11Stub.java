@@ -138,10 +138,16 @@ public class AirGroup11Stub implements IAirGroup11 {
     }
 
     @Override
-    public void cancelReserve(String token, String reserveCod) throws ReserveCancelException {
+    public void cancelReserve(String token, int reserveCod) throws ReserveCancelException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        baos.writeBytes(token.getBytes(StandardCharsets.UTF_8));
-        baos.writeBytes(reserveCod.getBytes(StandardCharsets.UTF_8));
+        DataOutputStream dos = new DataOutputStream(baos);
+
+        try {
+            dos.writeUTF(token);
+            dos.writeInt(reserveCod);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         Request request = new Request((byte) 0x5,
                 baos.toByteArray().length,
