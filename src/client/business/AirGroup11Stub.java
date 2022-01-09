@@ -13,22 +13,41 @@ import java.util.List;
 import java.util.Locale;
 
 public class AirGroup11Stub implements IAirGroup11 {
-    Demultiplexer demultiplexer = new Demultiplexer("localhost",5000);
+    Demultiplexer demultiplexer;
+
+    public AirGroup11Stub(){
+        demultiplexer = new Demultiplexer("localhost",9876);
+        Thread thread = new Thread(demultiplexer);
+        thread.start();
+    }
 
     @Override
     public void register(String username, String password) throws RegisterInvalidException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        DataOutputStream dos = new DataOutputStream(baos);
 
-        baos.writeBytes(username.getBytes(StandardCharsets.UTF_8));
-        baos.writeBytes(password.getBytes(StandardCharsets.UTF_8));
+        try {
+            dos.writeUTF(username);
+            dos.writeUTF(password);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         byte[] data = baos.toByteArray();
 
         Request request = new Request((byte) 0x0,data.length,data);
         Reply reply = demultiplexer.service(request);
 
+        DataInputStream dis = new DataInputStream(new ByteArrayInputStream(reply.getData()));
+
         if (reply.getError() == (byte) 0x0){
-            throw new RegisterInvalidException(new String(reply.getData(), StandardCharsets.US_ASCII));
+            String message = null;
+            try {
+                message = dis.readUTF();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            throw new RegisterInvalidException(message);
         }
     }
 
@@ -38,20 +57,39 @@ public class AirGroup11Stub implements IAirGroup11 {
     @Override
     public String login(String username, String password) throws LoginInvalidException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        DataOutputStream dos = new DataOutputStream(baos);
 
-        baos.writeBytes(username.getBytes(StandardCharsets.UTF_8));
-        baos.writeBytes(password.getBytes(StandardCharsets.UTF_8));
+        try {
+            dos.writeUTF(username);
+            dos.writeUTF(password);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         byte[] data = baos.toByteArray();
 
         Request request = new Request((byte) 0x1,data.length,data);
         Reply reply = demultiplexer.service(request);
 
+        DataInputStream dis = new DataInputStream(new ByteArrayInputStream(reply.getData()));
+
         if (reply.getError() == (byte) 0x0){
-            throw new LoginInvalidException(new String(reply.getData(), StandardCharsets.US_ASCII));
+            String message = null;
+            try {
+                message = dis.readUTF();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            throw new LoginInvalidException(message);
         }
 
-        return new String(reply.getData(), StandardCharsets.US_ASCII);
+        String token = null;
+        try {
+            token = dis.readUTF();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return token;
     }
 
     @Override
@@ -59,17 +97,30 @@ public class AirGroup11Stub implements IAirGroup11 {
         Flight flight = new Flight(origin,dest,capacity);
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        DataOutputStream dos = new DataOutputStream(baos);
 
-        baos.writeBytes(token.getBytes(StandardCharsets.UTF_8));
-        baos.writeBytes(flight.serialize());
+        try {
+            dos.writeUTF(token);
+            dos.write(flight.serialize());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         Request request = new Request((byte) 0x2,
                 baos.toByteArray().length,
                 baos.toByteArray());
         Reply reply = demultiplexer.service(request);
 
+        DataInputStream dis = new DataInputStream(new ByteArrayInputStream(reply.getData()));
+
         if (reply.getError() == (byte) 0x0){
-            throw new InsertFlightInvalidException(new String(reply.getData(), StandardCharsets.US_ASCII));
+            String message = null;
+            try {
+                message = dis.readUTF();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            throw new InsertFlightInvalidException(message);
         }
     }
 
@@ -80,17 +131,30 @@ public class AirGroup11Stub implements IAirGroup11 {
         String dateFormatted = day.format(dateFormatter);
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        DataOutputStream dos = new DataOutputStream(baos);
 
-        baos.writeBytes(token.getBytes(StandardCharsets.UTF_8));
-        baos.writeBytes(dateFormatted.getBytes(StandardCharsets.UTF_8));
+        try {
+            dos.writeUTF(token);
+            dos.writeUTF(dateFormatted);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         Request request = new Request((byte) 0x3,
                 baos.toByteArray().length,
                 baos.toByteArray());
         Reply reply = demultiplexer.service(request);
 
+        DataInputStream dis = new DataInputStream(new ByteArrayInputStream(reply.getData()));
+
         if (reply.getError() == (byte) 0x0){
-            throw new CancelDayInvalidException(new String(reply.getData(), StandardCharsets.US_ASCII));
+            String message = null;
+            try {
+                message = dis.readUTF();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            throw new CancelDayInvalidException(message);
         }
     }
 
@@ -125,11 +189,25 @@ public class AirGroup11Stub implements IAirGroup11 {
                     baos.toByteArray());
             Reply reply = demultiplexer.service(request);
 
+            DataInputStream dis = new DataInputStream(new ByteArrayInputStream(reply.getData()));
+
             if (reply.getError() == (byte) 0x0){
-                throw new ReserveTravelInvalidException(new String(reply.getData(), StandardCharsets.US_ASCII));
+                String message = null;
+                try {
+                    message = dis.readUTF();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                throw new ReserveTravelInvalidException(message);
             }
 
-            return new String(reply.getData(),StandardCharsets.UTF_8);
+            String reserveCode = null;
+            try {
+                reserveCode = dis.readUTF();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return reserveCode;
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -154,27 +232,48 @@ public class AirGroup11Stub implements IAirGroup11 {
                 baos.toByteArray());
         Reply reply = demultiplexer.service(request);
 
+        DataInputStream dis = new DataInputStream(new ByteArrayInputStream(reply.getData()));
+
         if (reply.getError() == (byte) 0x0){
-            throw new ReserveCancelException(new String(reply.getData(), StandardCharsets.US_ASCII));
+            String message = null;
+            try {
+                message = dis.readUTF();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            throw new ReserveCancelException(message);
         }
     }
 
     @Override
     public List<Flight> getAllFlights(String token) throws GetFlightsException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        baos.writeBytes(token.getBytes(StandardCharsets.UTF_8));
+        DataOutputStream dos = new DataOutputStream(baos);
+
+        try {
+            dos.writeUTF(token);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         Request request = new Request((byte) 0x6,
                 baos.toByteArray().length,
                 baos.toByteArray());
         Reply reply = demultiplexer.service(request);
 
-        if (reply.getError() == (byte) 0x0){
-            throw new GetFlightsException(new String(reply.getData(), StandardCharsets.US_ASCII));
-        }
-
         ByteArrayInputStream bais = new ByteArrayInputStream(reply.getData());
         DataInputStream dis = new DataInputStream(bais);
+
+        if (reply.getError() == (byte) 0x0){
+            String message = null;
+            try {
+                message = dis.readUTF();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            throw new GetFlightsException(message);
+        }
+
         try {
             int numberOfFlights = dis.readInt();
 
@@ -194,23 +293,33 @@ public class AirGroup11Stub implements IAirGroup11 {
     @Override
     public List<Route> getRoutes(String token, String orig, String dest) throws GetRoutesException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        DataOutputStream dos = new DataOutputStream(baos);
 
-        baos.writeBytes(token.getBytes(StandardCharsets.UTF_8));
-        baos.writeBytes(orig.getBytes(StandardCharsets.UTF_8));
-        baos.writeBytes(dest.getBytes(StandardCharsets.UTF_8));
+        try {
+            dos.writeUTF(token);
+            dos.writeUTF(orig);
+            dos.writeUTF(dest);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         byte[] data = baos.toByteArray();
 
         Request request = new Request((byte) 0x7,data.length,data);
-
         Reply reply = demultiplexer.service(request);
-
-        if (reply.getError() == (byte) 0x0){
-            throw new GetRoutesException(new String(reply.getData(), StandardCharsets.US_ASCII));
-        }
 
         ByteArrayInputStream bais = new ByteArrayInputStream(reply.getData());
         DataInputStream dis = new DataInputStream(bais);
+
+        if (reply.getError() == (byte) 0x0){
+            String message = null;
+            try {
+                message = dis.readUTF();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            throw new GetRoutesException(new String(message));
+        }
 
         try {
             int numberOfPlaces = dis.readInt();
