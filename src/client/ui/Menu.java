@@ -1,4 +1,4 @@
-package client.ui;
+package ui;
 
 import java.util.*;
 

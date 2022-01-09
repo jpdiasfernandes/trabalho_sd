@@ -1,8 +1,8 @@
-package client.business;
+package business;
 
-import client.business.Connection.Reply;
-import client.business.Connection.Request;
-import client.business.Exceptions.*;
+import business.Connection.Reply;
+import business.Connection.Request;
+import business.Exceptions.*;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -38,9 +38,8 @@ public class AirGroup11Stub implements IAirGroup11 {
         Request request = new Request((byte) 0x0,data.length,data);
         Reply reply = demultiplexer.service(request);
 
-        DataInputStream dis = new DataInputStream(new ByteArrayInputStream(reply.getData()));
-
         if (reply.getError() == (byte) 0x0){
+            DataInputStream dis = new DataInputStream(new ByteArrayInputStream(reply.getData()));
             String message = null;
             try {
                 message = dis.readUTF();

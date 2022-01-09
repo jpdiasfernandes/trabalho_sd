@@ -1,4 +1,4 @@
-package client.business.Connection;
+package business.Connection;
 
 import java.io.*;
 import java.net.Socket;
@@ -25,8 +25,11 @@ public class TaggedConnection {
             Short tag = dis.readShort();
             byte error = dis.readByte();
             int dataSize = dis.readInt();
-            byte[] data = new byte[dataSize];
-            dis.readFully(data);
+            byte[] data = null;
+            if (dataSize != 0) {
+                data = new byte[dataSize];
+                dis.readFully(data);
+            }
             return new Reply(tag,error,dataSize,data);
         } catch (IOException e) {
             e.printStackTrace();

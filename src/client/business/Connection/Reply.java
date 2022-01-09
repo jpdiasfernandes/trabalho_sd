@@ -1,4 +1,4 @@
-package client.business.Connection;
+package business.Connection;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -42,7 +42,10 @@ public class Reply {
             dos.writeShort(tag);
             dos.writeByte(error);
             dos.writeInt(dataSize);
-            dos.write(data);
+
+            if (dataSize != 0) {
+                dos.write(data);
+            }
             return baos.toByteArray();
         } catch (IOException e) {
             e.printStackTrace();

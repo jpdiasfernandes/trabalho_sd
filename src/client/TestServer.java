@@ -1,5 +1,3 @@
-package client;
-
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -10,6 +8,7 @@ public class TestServer {
             ServerSocket ss = new ServerSocket(9876);
             System.out.println("Server listen in port 9876 ...");
             while(true){
+                System.out.println("Aguardando um cliente...");
                 Socket clientSocket = ss.accept();
                 TestServerWorker ts = new TestServerWorker(clientSocket);
                 Thread t = new Thread(ts);

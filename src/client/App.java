@@ -1,6 +1,4 @@
-package client;
-
-import client.ui.TerminalUI;
+import ui.TerminalUI;
 
 public class App {
     public static void main(String[] args) {

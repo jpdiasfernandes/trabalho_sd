@@ -1,4 +1,4 @@
-package client.business.Exceptions;
+package business.Exceptions;
 
 public class InsertFlightInvalidException extends Exception{
     public InsertFlightInvalidException() {

@@ -1,6 +1,6 @@
-package client.business;
+package business;
 
-import client.business.Exceptions.*;
+import business.Exceptions.*;
 
 import java.time.LocalDateTime;
 import java.util.List;

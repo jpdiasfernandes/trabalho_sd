@@ -1,8 +1,8 @@
-package client.business;
+package business;
 
-import client.business.Connection.Reply;
-import client.business.Connection.Request;
-import client.business.Connection.TaggedConnection;
+import business.Connection.Reply;
+import business.Connection.Request;
+import business.Connection.TaggedConnection;
 
 import java.io.*;
 import java.net.Socket;
@@ -57,6 +57,7 @@ public class Demultiplexer implements Runnable{
         try{
             l.lock();
             tagSend = currentTag;
+            System.out.println("TAG atual: " + tagSend);
             Condition c = this.l.newCondition();
             conditions.put(tagSend,c);
             System.out.println("Enviei o request e vou adormecer até chegar o reply");

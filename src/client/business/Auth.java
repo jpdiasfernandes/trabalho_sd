@@ -1,4 +1,4 @@
-package client.business;
+package business;
 
 public class Auth {
     private String token;

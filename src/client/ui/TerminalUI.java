@@ -1,9 +1,9 @@
-package client.ui;
+package ui;
 
-import client.business.AirGroup11Stub;
-import client.business.Auth;
-import client.business.Exceptions.*;
-import client.business.IAirGroup11;
+import business.AirGroup11Stub;
+import business.Auth;
+import business.Exceptions.*;
+import business.IAirGroup11;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -66,14 +66,15 @@ public class TerminalUI {
     }
 
     private void registerHandler(){
-        System.out.println("username: ");
+        System.out.print("\n" +Colors.ANSI_GREEN + "$"+Colors.ANSI_RESET+" username > ");
         String username = scin.nextLine();
-        System.out.println("password: ");
+        System.out.print(Colors.ANSI_GREEN + "$"+Colors.ANSI_RESET+" password > ");
         String password = scin.nextLine();
 
         try {
             model.register(username,password);
         } catch (RegisterInvalidException e) {
+            System.out.print("Deu erro ... mensagem: ");
             System.out.println(e.getMessage());
             //e.printStackTrace();
         }

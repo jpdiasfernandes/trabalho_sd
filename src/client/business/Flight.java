@@ -1,4 +1,4 @@
-package client.business;
+package business;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
