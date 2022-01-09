@@ -1,5 +1,10 @@
 package client.business.Connection;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+
 public class Reply {
     private Short tag;
     private byte error;
@@ -27,5 +32,22 @@ public class Reply {
 
     public byte[] getData() {
         return data;
+    }
+
+    // Only for tests
+    public byte[] deserialize(){
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        DataOutputStream dos = new DataOutputStream(baos);
+        try {
+            dos.writeShort(tag);
+            dos.writeByte(error);
+            dos.writeInt(dataSize);
+            dos.write(data);
+            return baos.toByteArray();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return null;
     }
 }
