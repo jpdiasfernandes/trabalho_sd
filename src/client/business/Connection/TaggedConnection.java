@@ -41,6 +41,7 @@ public class TaggedConnection {
             this.dos.writeByte(request.getOpcode());
             this.dos.writeInt(request.getSize());
             this.dos.write(request.getData());
+            this.dos.flush();
         } catch (IOException e) {
             e.printStackTrace();
         }
