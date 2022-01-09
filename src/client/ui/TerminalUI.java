@@ -47,18 +47,21 @@ public class TerminalUI {
             System.out.print(Colors.ANSI_GREEN + "$"+Colors.ANSI_RESET+" password > ");
             String password = scin.nextLine();
 
-            //String token = model.login(username,password);
+            String token = model.login(username,password);
 
-            //Auth auth = Auth.getInstance();
-            //auth.setToken(token);
+            System.out.println("Obtida reply e o token é: " + token);
+
+            Auth auth = Auth.getInstance();
+            auth.setToken(token);
 
             home();
         }
         catch (NullPointerException e) {
+            e.printStackTrace();
+        } catch (LoginInvalidException e) {
+            System.out.print("Deu erro ... mensagem: ");
             System.out.println(e.getMessage());
-        //} catch (LoginInvalidException e) {
-        //    System.out.println(e.getMessage());
-        //    //e.printStackTrace();
+            //e.printStackTrace();
         }
     }
 
