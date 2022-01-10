@@ -165,14 +165,14 @@ public class TerminalUI {
 
         String token = Auth.getInstance().getToken();
 
-        // invoke model
-        /*
         try {
-            model.reserveTravel(token,dateStart,dateEnd,places);
+            int reserveCode = model.reserveTravel(token,dateStart,dateEnd,places);
+            System.out.println("Código da reserva: " + reserveCode);
         } catch (ReserveTravelInvalidException e) {
-            e.printStackTrace();
+            System.out.println("Deu erro ... mensagem: ");
+            System.out.println(e.getMessage());
+            //e.printStackTrace();
         }
-        */
     }
 
     private void cancelReserveHandler(){

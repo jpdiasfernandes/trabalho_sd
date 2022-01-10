@@ -10,7 +10,7 @@ public interface IAirGroup11 {
     String login(String username,String password) throws LoginInvalidException;
     void insertFlight(String token, String origin,String dest,Short capacity) throws InsertFlightInvalidException;
     void cancelDay(String token, LocalDateTime day) throws CancelDayInvalidException;
-    String reserveTravel(String token, LocalDateTime start, LocalDateTime end, List<String> places) throws ReserveTravelInvalidException;
+    int reserveTravel(String token, LocalDateTime start, LocalDateTime end, List<String> places) throws ReserveTravelInvalidException;
     void cancelReserve(String token, int reserveCod) throws ReserveCancelException;
     List<Flight> getAllFlights(String token) throws GetFlightsException;
     List<Route> getRoutes(String token, String orig,String dest) throws GetRoutesException;

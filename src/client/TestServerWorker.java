@@ -1,4 +1,5 @@
 import business.Connection.Reply;
+import ui.Colors;
 
 import java.io.*;
 import java.net.Socket;
@@ -19,11 +20,11 @@ class TestServerWorker implements Runnable{
                 System.out.println("Hora de deserializar o request do cliente ...");
                 DataInputStream dataInputStream = new DataInputStream(s.getInputStream());
                 Short tag = dataInputStream.readShort();
-                System.out.println("Já li uma TAG!");
+                System.out.print("Já li uma TAG! ->");
                 byte opcode = dataInputStream.readByte();
-                System.out.println("Já li um OPOCDE!");
+                System.out.print("Já li um OPOCDE! -> ");
                 int dataSize = dataInputStream.readInt();
-                System.out.println("Já li um DATA SIZE!");
+                System.out.print("Já li um DATA SIZE! \n");
                 // etapa de ler request genérica
                 byte[] data = new byte[dataSize];
                 dataInputStream.readFully(data);
@@ -34,6 +35,7 @@ class TestServerWorker implements Runnable{
 
                 if (opcode == (byte)0x0) answerRegister(data,tag);
                 if (opcode == (byte)0x1) answerLogin(data,tag);
+                if (opcode == (byte)0x4) answerReserve(data,tag);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -41,7 +43,7 @@ class TestServerWorker implements Runnable{
     }
 
     private void answerLogin(byte[] data,Short tag) throws IOException {
-        System.out.println("Foi detetado um Request de Login!");
+        System.out.println(Colors.ANSI_GREEN + "Foi detetado um Request de Login!" + Colors.ANSI_RESET);
         // o que vem a seguir é feito caso for detetado o opcode de login
         DataInputStream dis = new DataInputStream(new ByteArrayInputStream(data));
         String username = dis.readUTF();
@@ -59,12 +61,12 @@ class TestServerWorker implements Runnable{
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         DataOutputStream dos = new DataOutputStream(baos);
-        //dos.writeUTF(token);
-        dos.writeUTF(errorMessage);
+        dos.writeUTF(token);
+        //dos.writeUTF(errorMessage);
 
         Reply r = new Reply(
                 tag,
-                (byte) 0x0,
+                (byte) 0x1,
                 baos.toByteArray().length,
                 baos.toByteArray()
         );
@@ -77,7 +79,7 @@ class TestServerWorker implements Runnable{
     }
 
     private void answerRegister(byte[] data,Short tag) throws IOException {
-        System.out.println("Foi detetado um Request de Register !");
+        System.out.println(Colors.ANSI_GREEN + "Foi detetado um Request de Register !" + Colors.ANSI_RESET);
         // o que vem a seguir é feito caso for detetado o opcode de registo
         DataInputStream dis = new DataInputStream(new ByteArrayInputStream(data));
         String username = dis.readUTF();
@@ -99,9 +101,48 @@ class TestServerWorker implements Runnable{
 
         Reply r = new Reply(
                 tag,
-                (byte) 0x1,
-                0,
-                null
+                (byte) 0x0,
+                baos.toByteArray().length,
+                baos.toByteArray()
+        );
+
+        DataOutputStream dos2 = new DataOutputStream(s.getOutputStream());
+        System.out.println("Enviando a Reply...");
+        dos2.write(r.deserialize());
+        dos2.flush();
+        System.out.println("Reply foi enviada");
+    }
+
+    private void answerReserve(byte[] data,Short tag) throws IOException{
+        System.out.println(Colors.ANSI_GREEN + "Foi detetado um Request de Reserve!" + Colors.ANSI_RESET);
+        // o que vem a seguir é feito caso for detetado o opcode de reserve
+        DataInputStream dis = new DataInputStream(new ByteArrayInputStream(data));
+        String token = dis.readUTF();
+        System.out.println("Consegui ler o token!");
+        String startDay = dis.readUTF();
+        System.out.println("Consegui ler o dia inicial!");
+        String endDay = dis.readUTF();
+        System.out.println("Consegui ler o dia final!");
+
+        System.out.println("TOKEN: " + token);
+        System.out.println("START DAY: " + startDay);
+        System.out.println("END DAY: " + endDay);
+
+        System.out.println("Preparando a Reply...");
+
+        int reserveCode = 1235;
+        String errorMessage = "token inválido";
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        DataOutputStream dos = new DataOutputStream(baos);
+        //dos.writeInt(reserveCode);
+        dos.writeUTF(errorMessage);
+
+        Reply r = new Reply(
+                tag,
+                (byte) 0x0,
+                baos.toByteArray().length,
+                baos.toByteArray()
         );
 
         DataOutputStream dos2 = new DataOutputStream(s.getOutputStream());
