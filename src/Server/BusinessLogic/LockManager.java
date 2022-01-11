@@ -3,6 +3,7 @@ package Server.BusinessLogic;
 import Server.BusinessLogic.Excecoes.UnlockException;
 import Server.BusinessLogic.Excecoes.UnlockSemLockException;
 
+import javax.accessibility.AccessibleAction;
 import java.util.*;
 import java.util.concurrent.locks.*;
 
@@ -159,37 +160,57 @@ public class LockManager {
         l.unlock();
     }
 
-    public void unlockConta(Utilizador u) throws UnlockSemLockException, UnlockException {
+    public void unlockConta(Utilizador u) {
         l.lock();
         long id = Thread.currentThread().getId();
-        removeState(gestao, id);
-        removeState(gestao.contas, id);
-        unlockObj(u, id);
+        try {
+            removeState(gestao, id);
+            removeState(gestao.contas, id);
+            unlockObj(u, id);
+        } catch (UnlockException | UnlockSemLockException e) {
+            e.printStackTrace();
+        }
+
         l.unlock();
     }
 
-    public void unlockContasLN() throws UnlockSemLockException, UnlockException {
+    public void unlockContasLN() {
         l.lock();
         long id = Thread.currentThread().getId();
-        removeState(gestao, id);
-        unlockObj(gestao.contas, id);
+        try {
+            removeState(gestao, id);
+            unlockObj(gestao.contas, id);
+        } catch (UnlockException | UnlockSemLockException e) {
+            e.printStackTrace();
+        }
+
         l.unlock();
     }
 
-    public void unlockViagem(Viagem v) throws UnlockSemLockException, UnlockException {
+    public void unlockViagem(Viagem v) {
         l.lock();
         long id = Thread.currentThread().getId();
-        removeState(gestao, id);
-        removeState(gestao.voos, id);
-        unlockObj(v, id);
+        try {
+            removeState(gestao, id);
+            removeState(gestao.voos, id);
+            unlockObj(v, id);
+        } catch (UnlockException | UnlockSemLockException e) {
+            e.printStackTrace();
+        }
+
         l.unlock();
     }
 
-    public void unlockVoosLN() throws UnlockSemLockException, UnlockException {
+    public void unlockVoosLN() {
         l.lock();
         long id = Thread.currentThread().getId();
-        removeState(gestao, id);
-        unlockObj(gestao.voos, id);
+        try {
+            removeState(gestao, id);
+            unlockObj(gestao.voos, id);
+        } catch (UnlockException | UnlockSemLockException e) {
+            e.printStackTrace();
+        }
+
         l.unlock();
     }
 
@@ -198,6 +219,9 @@ public class LockManager {
         LockState ls = locks.get(obj);
         Mode mode = ls.getMode(tid);
         removeState(obj, tid);
+        if (ls.current == 0)
+            locks.remove(obj);
+        l.unlock();
         switch(mode) {
             case S:
                 ls.rl.unlock();
@@ -208,10 +232,8 @@ public class LockManager {
             default:
                 break;
         }
-        if (ls.current == 0)
-            locks.remove(obj);
 
-        l.unlock();
+
 
     }
 
@@ -231,6 +253,7 @@ public class LockManager {
         ILock(obj, mode);
         LockState ls = locks.get(obj);
         if (ls == null) System.out.println("Não deveria estar a acontecer!!");
+        l.unlock();
         switch (mode) {
             case S:
                 ls.rl.lock();
@@ -241,7 +264,6 @@ public class LockManager {
             default:
                 break;
         }
-        l.unlock();
     }
 
 
@@ -256,14 +278,16 @@ public class LockManager {
         ModeState ms = ls.addMode(mode);
 
         try {
-            while(!executeLockState(ls, ms))
+            while(!executeLockState(ls, ms)) {
                 c.await();
+            }
 
             ls.moveToLocked(ms.tid);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
 
+        l.unlock();
     }
 
     private boolean compatibleMode(Mode m1, Mode m2) {
@@ -274,12 +298,59 @@ public class LockManager {
         Set<ModeState> toCheck = ls.modes.headSet(ms);
         Set<ModeState> toCheckLocked = ls.modesLocked;
         for (ModeState mState : toCheck) {
-            if (!compatibleMode(ms.mode,mState.mode)) return false;
+            if (!compatibleMode(ms.mode,mState.mode) && mState.tid != ms.tid) return false;
         }
         for (ModeState mState : toCheckLocked) {
-            if (!compatibleMode(ms.mode, mState.mode)) return false;
+            if (!compatibleMode(ms.mode, mState.mode) && mState.tid != ms.tid) return false;
         }
 
         return true;
+    }
+
+    public void lock(Object obj, Mode mode) {
+        l.lock();
+        System.out.println("LOCK MODE : " + mode);
+        LockState ls = locks.get(obj);
+        if (ls == null) {
+            ls = new LockState();
+            locks.put(obj, ls);
+        }
+
+        ls.addMode(mode);
+        l.unlock();
+        switch (mode) {
+            case S :
+                 ls.rl.lock();
+                 break;
+            case X :
+                ls.wl.lock();
+                break;
+            default:
+                break;
+        }
+        System.out.println("Unlocked");
+    }
+
+    public void unlock(Object obj) {
+        l.lock();
+        LockState ls = locks.get(obj);
+
+        Mode mode = ls.getMode(Thread.currentThread().getId());
+
+        System.out.println("MODE : " + mode);
+        l.unlock();
+        switch (mode) {
+            case S :
+                ls.rl.unlock();
+                break;
+            case X:
+                ls.wl.unlock();
+                break;
+            default:
+                break;
+
+        }
+
+        System.out.println("Unlocked");
     }
 }
