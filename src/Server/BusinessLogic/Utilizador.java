@@ -20,4 +20,7 @@ public class Utilizador {
         reservas.put(data, vooKey);
     }
 
+    public void removeDiaReserva(LocalDate data) {
+        reservas.remove(data);
+    }
 }

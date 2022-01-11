@@ -1,5 +1,6 @@
 package Server.BusinessLogic;
 
+import Server.BusinessLogic.Excecoes.DataSemVoosException;
 import Server.BusinessLogic.Excecoes.VooIndisponivelException;
 
 import java.time.LocalDate;
@@ -7,6 +8,7 @@ import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.stream.Collectors;
 
 public class VoosLN {
     // Voos disponiveis
@@ -29,5 +31,28 @@ public class VoosLN {
         Voo portoKongsberg = new Voo("Porto", "Kongsberg", 135);
         Voo portoGoteborg = new Voo("Porto", "Goteborg", 160);
     }
+
+    public Set<Viagem> getViagensData(LocalDate data) throws DataSemVoosException {
+        Map<Map.Entry<String, String>, Viagem> mapViagens = datasVoos.get(data);
+        Set<Viagem> viagens = new TreeSet<>();
+        if (mapViagens == null) throw new DataSemVoosException("Esta data não tem nenhum voo");
+        for (Viagem v : mapViagens.values())
+            viagens.add(v);
+
+        return viagens;
+    }
+
+    public Set<String> getUsernamesData(LocalDate data) throws DataSemVoosException {
+        Map<Map.Entry<String, String>, Viagem> mapViagens = datasVoos.get(data);
+        Set<String> usernames = new TreeSet<>();
+        if (mapViagens == null) throw new DataSemVoosException("Esta data não tem nenhum voo");
+        for (Viagem v : mapViagens.values()) {
+            for (String username : v.reservas)
+                usernames.add(username);
+        }
+
+        return usernames;
+    }
+
 
 }

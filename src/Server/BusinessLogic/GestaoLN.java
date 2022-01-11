@@ -5,6 +5,8 @@ import jdk.jshell.execution.Util;
 
 import java.time.LocalDate;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -112,6 +114,36 @@ public class GestaoLN {
         }
 
     }
+public void cancelarDia(LocalDate data) throws DataSemVoosException {
+        // No fim fazer refactor para tirar este lock do this
+        // Se se fizer um lock ordenado sempre lock voos e depois contas não é preciso
+    lm.lock(this, Mode.X);
+    lm.lock(voos, Mode.X);
+    lm.lock(this.contas, Mode.X);
+    lm.unlock(this);
+    voos.datasVoos.remove(data);
+    lm.unlock(voos);
+    Set<String> usernames = voos.getUsernamesData(data);
+    Set<Utilizador> contas = new TreeSet<>();
+
+    // Ainda consigo otimizar isto
+    try {
+        for(String username : usernames) {
+            Utilizador u = this.contas.getConta(username);
+            contas.add(u);
+        }
+        contas.stream().sorted().forEach(u-> lm.lock(u, Mode.X));
+    } catch (UsernameNaoExistenteException e) {
+        e.printStackTrace();
+    }
+    lm.unlock(this.contas);
+    // Se calhar depois pode-se criar notificações
+    for (Utilizador u : contas) {
+        u.removeDiaReserva(data);
+        lm.unlock(u);
+    }
+
+}
 
 
 
