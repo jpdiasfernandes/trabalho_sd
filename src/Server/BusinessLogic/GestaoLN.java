@@ -10,23 +10,8 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public class GestaoLN {
     LockManager lm = new LockManager(this);
-    public ContasLN contas = new ContasLN(lm);
-    public VoosLN voos = new VoosLN(lm);
-
-    public void addMoney(String username) {
-
-        try {
-            lm.lock(contas, Mode.S);
-            Utilizador u = contas.getConta(username);
-            lm.lock(u, Mode.X);
-            lm.unlock(contas);
-            u.dinheiro += 100;
-            System.out.println("TOTAL : " + u.dinheiro);
-            lm.unlock(u);
-        } catch (UsernameNaoExistenteException e) {
-
-        }
-    }
+    public ContasLN contas = new ContasLN();
+    public VoosLN voos = new VoosLN();
 
     public void registarUtilizador(String username, String pwd) throws UsernameExistenteException {
         lm.lock(this, Mode.X);

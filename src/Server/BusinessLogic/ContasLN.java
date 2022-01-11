@@ -14,7 +14,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class ContasLN {
     public Map<String, Utilizador> contas;
-    public ContasLN(LockManager lm) {
+    public ContasLN() {
         contas = new HashMap<>();
         Utilizador u1 = new Utilizador("girafa", "1234");
         Utilizador u2 = new Utilizador("zebra", "qwerty");
