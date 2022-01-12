@@ -63,6 +63,8 @@ class TestServerWorker implements Runnable{
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         DataOutputStream dos = new DataOutputStream(baos);
         dos.writeUTF(token);
+        // isAdmin
+        dos.writeBoolean(true);
         //dos.writeUTF(errorMessage);
 
         Reply r = new Reply(
@@ -78,7 +80,6 @@ class TestServerWorker implements Runnable{
         dos2.flush();
         System.out.println("Reply foi enviada");
     }
-
     private void answerRegister(byte[] data,Short tag) throws IOException {
         System.out.println(Colors.ANSI_GREEN + "Foi detetado um Request de Register !" + Colors.ANSI_RESET);
         // o que vem a seguir é feito caso for detetado o opcode de registo
@@ -113,7 +114,6 @@ class TestServerWorker implements Runnable{
         dos2.flush();
         System.out.println("Reply foi enviada");
     }
-
     private void answerReserve(byte[] data,Short tag) throws IOException{
         System.out.println(Colors.ANSI_GREEN + "Foi detetado um Request de Reserve!" + Colors.ANSI_RESET);
         // o que vem a seguir é feito caso for detetado o opcode de reserve
@@ -152,7 +152,6 @@ class TestServerWorker implements Runnable{
         dos2.flush();
         System.out.println("Reply foi enviada");
     }
-
     private void answerCancelReserve(byte[] data,Short tag) throws IOException {
         System.out.println(Colors.ANSI_GREEN + "Foi detetado um Request de Cancel Reserve!" + Colors.ANSI_RESET);
         // o que vem a seguir é feito caso for detetado o opcode de cancel reserve

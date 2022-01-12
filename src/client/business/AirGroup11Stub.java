@@ -11,6 +11,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 public class AirGroup11Stub implements IAirGroup11 {
     Demultiplexer demultiplexer;
@@ -51,10 +52,10 @@ public class AirGroup11Stub implements IAirGroup11 {
     }
 
     /**
-     *  @returns TOKEN
+     *  @returns <TOKEN,IsADMIN>
      */
     @Override
-    public String login(String username, String password) throws LoginInvalidException {
+    public Map.Entry<String,Boolean> login(String username, String password) throws LoginInvalidException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         DataOutputStream dos = new DataOutputStream(baos);
 
@@ -83,13 +84,18 @@ public class AirGroup11Stub implements IAirGroup11 {
         }
 
         String token = null;
+        boolean isAdmin = false;
+        Map.Entry<String,Boolean> loginAnswer = null;
         try {
             if (reply.getDataSize() > 0)
                 token = dis.readUTF();
+                isAdmin = dis.readBoolean();
+                loginAnswer = Map.entry(token,isAdmin);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return token;
+
+        return loginAnswer;
     }
 
     @Override
