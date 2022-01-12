@@ -36,6 +36,7 @@ class TestServerWorker implements Runnable{
                 if (opcode == (byte)0x0) answerRegister(data,tag);
                 if (opcode == (byte)0x1) answerLogin(data,tag);
                 if (opcode == (byte)0x4) answerReserve(data,tag);
+                if (opcode == (byte)0x5) answerCancelReserve(data,tag);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -143,6 +144,40 @@ class TestServerWorker implements Runnable{
                 (byte) 0x0,
                 baos.toByteArray().length,
                 baos.toByteArray()
+        );
+
+        DataOutputStream dos2 = new DataOutputStream(s.getOutputStream());
+        System.out.println("Enviando a Reply...");
+        dos2.write(r.deserialize());
+        dos2.flush();
+        System.out.println("Reply foi enviada");
+    }
+
+    private void answerCancelReserve(byte[] data,Short tag) throws IOException {
+        System.out.println(Colors.ANSI_GREEN + "Foi detetado um Request de Cancel Reserve!" + Colors.ANSI_RESET);
+        // o que vem a seguir é feito caso for detetado o opcode de cancel reserve
+        DataInputStream dis = new DataInputStream(new ByteArrayInputStream(data));
+        String token = dis.readUTF();
+        System.out.println("Consegui ler o token!");
+        int reserveCode = dis.readInt();
+        System.out.println("Consegui ler o código da reserva!");
+
+        System.out.println("TOKEN: " + token);
+        System.out.println("RESERVECODE: " + reserveCode);
+
+        System.out.println("Preparando a Reply...");
+
+        String errorMessage = "Credenciais inválidas";
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        DataOutputStream dos = new DataOutputStream(baos);
+        dos.writeUTF(errorMessage);
+
+        Reply r = new Reply(
+                tag,
+                (byte) 0x1,
+                0,
+                null
         );
 
         DataOutputStream dos2 = new DataOutputStream(s.getOutputStream());

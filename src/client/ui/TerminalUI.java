@@ -183,14 +183,13 @@ public class TerminalUI {
 
         String token = Auth.getInstance().getToken();
 
-        // invoke model
-        /*
         try {
             model.cancelReserve(token,reserveCode);
         } catch (ReserveCancelException e) {
-            e.printStackTrace();
+            System.out.println("Deu erro ... mensagem: ");
+            System.out.println(e.getMessage());
+            //e.printStackTrace();
         }
-         */
     }
 
     private void getAllFlightsHandler(){

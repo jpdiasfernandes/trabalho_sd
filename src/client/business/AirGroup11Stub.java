@@ -232,9 +232,8 @@ public class AirGroup11Stub implements IAirGroup11 {
                 baos.toByteArray());
         Reply reply = demultiplexer.service(request);
 
-        DataInputStream dis = new DataInputStream(new ByteArrayInputStream(reply.getData()));
-
-        if (reply.getError() == (byte) 0x0){
+        if (reply.getError() == (byte) 0x0 && reply.getDataSize() > 0){
+            DataInputStream dis = new DataInputStream(new ByteArrayInputStream(reply.getData()));
             String message = null;
             try {
                 message = dis.readUTF();
