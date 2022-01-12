@@ -4,10 +4,7 @@ import Server.BusinessLogic.Excecoes.*;
 import jdk.jshell.execution.Util;
 
 import java.time.LocalDate;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -31,7 +28,7 @@ public class GestaoLN {
 
 
 
-    public boolean validarUtilizador(String username, String pwd) throws UsernameNaoExistenteException {
+    public boolean validarUtilizador(String username, String pwd) throws UsernameNaoExistenteException, PasswordErradaException {
         lm.lock(this, Mode.S);
         lm.lock(contas, Mode.S);
         lm.unlock(this);
@@ -168,6 +165,21 @@ public class GestaoLN {
         v.reservas.remove(username);
         lm.unlock(v);
     }
+
+    public List<Map.Entry<String, String>> getVoos() {
+        List<Map.Entry<String, String>> r = new ArrayList<>();
+        lm.lock(voos, Mode.S);
+
+        for (Map.Entry<String, String> me: voos.voos.keySet())
+            r.add(me);
+
+        lm.unlock(voos);
+
+        return r;
+    }
+
+
+
 
 
 
