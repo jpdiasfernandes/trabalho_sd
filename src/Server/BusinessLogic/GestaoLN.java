@@ -98,7 +98,7 @@ public class GestaoLN {
 
         v.reservas.add(username);
         lm.unlock(v);
-        u.addReserva(data, Map.entry(origem, destino));
+        u.addReserva(v.codViagem);
         lm.unlock(u);
 
     }
@@ -148,10 +148,25 @@ public class GestaoLN {
         lm.unlock(voos);
         for (Viagem v : viagens) {
             v.reservas.add(username);
-            u.addReserva(v.data, Map.entry(v.voo.origem, v.voo.destino));
+            u.addReserva(v.codViagem);
             lm.unlock(v);
         }
         lm.unlock(u);
+    }
+
+    public void cancelarReserva(String username, int codViagem) throws UsernameNaoExistenteException, VooIndisponivelException {
+        lm.lock(voos, Mode.X);
+        lm.lock(contas, Mode.X);
+        Utilizador u = contas.getConta(username);
+        lm.lock(u, Mode.X);
+        lm.unlock(contas);
+        Viagem v = voos.getViagem(codViagem);
+        lm.lock(v, Mode.X);
+        lm.unlock(voos);
+        u.reservas.remove(codViagem);
+        lm.unlock(u);
+        v.reservas.remove(username);
+        lm.unlock(v);
     }
 
 

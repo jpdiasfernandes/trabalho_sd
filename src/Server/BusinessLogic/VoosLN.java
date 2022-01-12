@@ -133,5 +133,11 @@ public class VoosLN {
         return v;
     }
 
+    public Viagem getViagem(int codViagem) throws VooIndisponivelException {
+        Viagem v = viagens.get(codViagem);
+        if (v == null) throw new VooIndisponivelException("Este código de viagem não existe");
+        return v;
+    }
+
 
 }

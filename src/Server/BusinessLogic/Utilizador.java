@@ -1,24 +1,26 @@
 package Server.BusinessLogic;
 
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class Utilizador {
-    String username;
-    String password;
-    public Lock l = new ReentrantLock();
-    private Map<LocalDate, Map.Entry<String, String>> reservas;
+    public String username;
+    public String password;
+    public Set<Integer> reservas;
 
 
     public Utilizador(String username, String password) {
         this.username = username;
         this.password = password;
+        this.reservas = new HashSet<>();
     }
 
-    public void addReserva(LocalDate data, Map.Entry<String, String> vooKey) {
-        reservas.put(data, vooKey);
+    public void addReserva(Integer codViagem) {
+        reservas.add(codViagem);
     }
 
     public void removeDiaReserva(LocalDate data) {
