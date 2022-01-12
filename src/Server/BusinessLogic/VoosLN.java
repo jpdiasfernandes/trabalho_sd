@@ -67,5 +67,71 @@ public class VoosLN {
         }
     }
 
+    public List<Map.Entry<String, String>> getOrigemDestino(List<String> destinos) {
+        return null;
+    }
+
+    public List<Viagem> getViagensIntervalo(List<Map.Entry<String,String>> viagensAReservar, LocalDate dataInicial, LocalDate dataFinal)
+            throws VooIndisponivelException{
+        for (Map.Entry<String, String> key : viagensAReservar) {
+            if (!voos.containsKey(key))
+                throw new VooIndisponivelException("Pelo menos um destino não é possível acessar" +
+                        " seguindo a sequência de destinos dada");
+        }
+
+        List<Viagem> r = new ArrayList<>();
+
+        for (Map.Entry<String, String> key : viagensAReservar) {
+            // a próxima reserva tem que ser na data ou após a data da ultima reserva
+            Viagem v = reservarViagemIntervalo(key, dataInicial, dataFinal);
+            r.add(v);
+            dataInicial = v.data;
+        }
+
+        return r;
+    }
+
+    private Viagem reservarViagemIntervalo(Map.Entry<String, String> origemDestino, LocalDate dataInicial, LocalDate dataFinal)
+            throws VooIndisponivelException {
+        List<LocalDate> datasDisponiveis = intervaloDatas(dataInicial, dataFinal);
+        if (datasDisponiveis.size() == 0)
+
+        for(LocalDate ld : datasDisponiveis) {
+            try {
+                Viagem r = getOrCreateViagem(origemDestino, ld);
+                return r;
+            } catch (VooIndisponivelException e) {
+
+            }
+        }
+
+        throw new VooIndisponivelException("Não existem datas para a viagem " +
+                origemDestino.getKey() + " -> " + origemDestino.getValue() + ".");
+    }
+
+    private List<LocalDate> intervaloDatas(LocalDate dataInicial, LocalDate dataFinal) {
+        return dataInicial.datesUntil(dataFinal).collect(Collectors.toList());
+    }
+
+    public Viagem getOrCreateViagem(Map.Entry<String, String> origemDestino, LocalDate data) throws VooIndisponivelException {
+        Integer codViagem;
+        Viagem v;
+        if (!voos.containsKey(origemDestino)) throw new VooIndisponivelException("Voo não existe.");
+        Map<Map.Entry<String, String>, Integer> voosData = datasVoos.get(data);
+        if ((codViagem = voosData.get(origemDestino)) == null) {
+            v = new Viagem(voos.get(origemDestino), data);
+            viagens.put(codViagem, v);
+            voosData.put(origemDestino, v.codViagem);
+            //Não me lembro se é preciso fazer o put outra vez, mas acho que não era preciso
+            datasVoos.put(data, voosData);
+        } else {
+            v = viagens.get(codViagem);
+        }
+
+        if (v.reservas.size() + 1 > v.voo.capacidade) throw new VooIndisponivelException("Não existe capacidade para esta viagem");
+
+        return v;
+    }
+
 
 }

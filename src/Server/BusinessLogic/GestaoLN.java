@@ -4,6 +4,7 @@ import Server.BusinessLogic.Excecoes.*;
 import jdk.jshell.execution.Util;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -78,24 +79,10 @@ public class GestaoLN {
         lm.lock(contas, Mode.X);
         lm.unlock(this);
 
-        Map.Entry<String, String> vooKey = Map.entry(origem, destino);
         Viagem v;
         Integer codViagem;
         try {
-            if (!voos.voos.containsKey(vooKey)) throw new VooIndisponivelException("Voo não existe.");
-            Map<Map.Entry<String, String>, Integer> voosData = voos.datasVoos.get(data);
-            if ((codViagem = voosData.get(vooKey)) == null) {
-                v = new Viagem(voos.voos.get(vooKey), data);
-                voos.viagens.put(codViagem, v);
-                voosData.put(vooKey, v.codViagem);
-                //Não me lembro se é preciso fazer o put outra vez, mas acho que não era preciso
-                voos.datasVoos.put(data, voosData);
-            } else {
-                v = voos.viagens.get(codViagem);
-            }
-
-
-
+            v = voos.getOrCreateViagem(Map.entry(origem, destino), data);
             lm.lock(v, Mode.X);
         } finally {
             lm.unlock(voos);
@@ -109,47 +96,63 @@ public class GestaoLN {
             lm.unlock(contas);
         }
 
+        v.reservas.add(username);
+        lm.unlock(v);
+        u.addReserva(data, Map.entry(origem, destino));
+        lm.unlock(u);
 
+    }
+    public void cancelarDia(LocalDate data) throws DataSemVoosException {
+        // No fim fazer refactor para tirar este lock do this
+        // Se se fizer um lock ordenado sempre lock voos e depois contas não é preciso
+        lm.lock(this, Mode.X);
+        lm.lock(voos, Mode.X);
+        lm.lock(this.contas, Mode.X);
+        lm.unlock(this);
+        Set<String> usernames = voos.getUsernamesData(data);
+        voos.removeDia(data);
+        lm.unlock(voos);
+        Set<Utilizador> contas = new TreeSet<>();
+
+        // Ainda consigo otimizar isto
         try {
-            if (v.reservas.size() + 1 > v.voo.capacidade) throw new VooIndisponivelException("Não existem vagas para o voo.");
-            v.reservas.add(username);
-            u.addReserva(data, vooKey);
-        } finally {
-            lm.unlock(v);
+            for(String username : usernames) {
+                Utilizador u = this.contas.getConta(username);
+                contas.add(u);
+            }
+            contas.stream().sorted().forEach(u-> lm.lock(u, Mode.X));
+        } catch (UsernameNaoExistenteException e) {
+            e.printStackTrace();
+        }
+        lm.unlock(this.contas);
+        // Se calhar depois pode-se criar notificações
+        for (Utilizador u : contas) {
+            u.removeDiaReserva(data);
             lm.unlock(u);
         }
 
     }
-public void cancelarDia(LocalDate data) throws DataSemVoosException {
-        // No fim fazer refactor para tirar este lock do this
-        // Se se fizer um lock ordenado sempre lock voos e depois contas não é preciso
-    lm.lock(this, Mode.X);
-    lm.lock(voos, Mode.X);
-    lm.lock(this.contas, Mode.X);
-    lm.unlock(this);
-    Set<String> usernames = voos.getUsernamesData(data);
-    voos.removeDia(data);
-    lm.unlock(voos);
-    Set<Utilizador> contas = new TreeSet<>();
 
-    // Ainda consigo otimizar isto
-    try {
-        for(String username : usernames) {
-            Utilizador u = this.contas.getConta(username);
-            contas.add(u);
+    public void reservarViagem(String username, LocalDate dataInicial, LocalDate dataFinal, List<String> destinos)
+        throws VooIndisponivelException, UsernameNaoExistenteException {
+        lm.lock(voos, Mode.X);
+        lm.lock(contas, Mode.X);
+        Utilizador u = contas.getConta(username);
+        lm.lock(u, Mode.X);
+        lm.unlock(contas);
+        List<Map.Entry<String, String>> viagensAReservar = voos.getOrigemDestino(destinos);
+        List<Viagem> viagens = voos.getViagensIntervalo(viagensAReservar, dataInicial, dataFinal);
+        for (Viagem v : viagens) {
+            lm.lock(v, Mode.X);
         }
-        contas.stream().sorted().forEach(u-> lm.lock(u, Mode.X));
-    } catch (UsernameNaoExistenteException e) {
-        e.printStackTrace();
-    }
-    lm.unlock(this.contas);
-    // Se calhar depois pode-se criar notificações
-    for (Utilizador u : contas) {
-        u.removeDiaReserva(data);
+        lm.unlock(voos);
+        for (Viagem v : viagens) {
+            v.reservas.add(username);
+            u.addReserva(v.data, Map.entry(v.voo.origem, v.voo.destino));
+            lm.unlock(v);
+        }
         lm.unlock(u);
     }
-
-}
 
 
 
