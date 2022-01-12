@@ -80,15 +80,21 @@ public class GestaoLN {
 
         Map.Entry<String, String> vooKey = Map.entry(origem, destino);
         Viagem v;
+        Integer codViagem;
         try {
             if (!voos.voos.containsKey(vooKey)) throw new VooIndisponivelException("Voo não existe.");
-            Map<Map.Entry<String, String>, Viagem> voosData = voos.datasVoos.get(data);
-            if ((v = voosData.get(vooKey)) == null) {
-                v = new Viagem(voos.voos.get(vooKey));
-                voosData.put(vooKey, v);
+            Map<Map.Entry<String, String>, Integer> voosData = voos.datasVoos.get(data);
+            if ((codViagem = voosData.get(vooKey)) == null) {
+                v = new Viagem(voos.voos.get(vooKey), data);
+                voos.viagens.put(codViagem, v);
+                voosData.put(vooKey, v.codViagem);
                 //Não me lembro se é preciso fazer o put outra vez, mas acho que não era preciso
                 voos.datasVoos.put(data, voosData);
+            } else {
+                v = voos.viagens.get(codViagem);
             }
+
+
 
             lm.lock(v, Mode.X);
         } finally {
@@ -121,9 +127,9 @@ public void cancelarDia(LocalDate data) throws DataSemVoosException {
     lm.lock(voos, Mode.X);
     lm.lock(this.contas, Mode.X);
     lm.unlock(this);
-    voos.datasVoos.remove(data);
-    lm.unlock(voos);
     Set<String> usernames = voos.getUsernamesData(data);
+    voos.removeDia(data);
+    lm.unlock(voos);
     Set<Utilizador> contas = new TreeSet<>();
 
     // Ainda consigo otimizar isto

@@ -16,7 +16,8 @@ public class VoosLN {
     // Voos que estão registados, se o voo não estiver aqui é porque
     // ele ainda não teve nenhuma reserva. Assim que houver a primeira
     // reserva num determinado dia, adiciona-se.
-    public Map<LocalDate, Map<Map.Entry<String,String>, Viagem>> datasVoos;
+    public Map<LocalDate, Map<Map.Entry<String,String>, Integer>> datasVoos;
+    public Map<Integer, Viagem> viagens;
 
     private ReadWriteLock rwl = new ReentrantReadWriteLock();
     public Lock rl = rwl.readLock();
@@ -33,25 +34,37 @@ public class VoosLN {
     }
 
     public Set<Viagem> getViagensData(LocalDate data) throws DataSemVoosException {
-        Map<Map.Entry<String, String>, Viagem> mapViagens = datasVoos.get(data);
+        Map<Map.Entry<String, String>, Integer> mapViagens = datasVoos.get(data);
         Set<Viagem> viagens = new TreeSet<>();
         if (mapViagens == null) throw new DataSemVoosException("Esta data não tem nenhum voo");
-        for (Viagem v : mapViagens.values())
+        for (Integer codViagem : mapViagens.values()) {
+            Viagem v = this.viagens.get(codViagem);
             viagens.add(v);
+        }
 
         return viagens;
     }
 
     public Set<String> getUsernamesData(LocalDate data) throws DataSemVoosException {
-        Map<Map.Entry<String, String>, Viagem> mapViagens = datasVoos.get(data);
+        Map<Map.Entry<String, String>, Integer> mapViagens = datasVoos.get(data);
         Set<String> usernames = new TreeSet<>();
         if (mapViagens == null) throw new DataSemVoosException("Esta data não tem nenhum voo");
-        for (Viagem v : mapViagens.values()) {
+        for (Integer codViagem : mapViagens.values()) {
+            Viagem v = this.viagens.get(codViagem);
             for (String username : v.reservas)
                 usernames.add(username);
         }
 
         return usernames;
+    }
+
+    public void removeDia(LocalDate data) {
+        Map<Map.Entry<String, String>, Integer> codViagens = this.datasVoos.get(data);
+        if(codViagens != null) {
+            for (Integer cod : codViagens.values())
+                this.viagens.remove(cod);
+            this.datasVoos.remove(data);
+        }
     }
 
 

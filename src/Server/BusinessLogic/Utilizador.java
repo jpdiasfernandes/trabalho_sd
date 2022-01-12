@@ -11,6 +11,7 @@ public class Utilizador {
     public Lock l = new ReentrantLock();
     private Map<LocalDate, Map.Entry<String, String>> reservas;
 
+
     public Utilizador(String username, String password) {
         this.username = username;
         this.password = password;
