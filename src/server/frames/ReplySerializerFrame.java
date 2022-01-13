@@ -1,6 +1,15 @@
 package server.frames;
 
 public class ReplySerializerFrame {
-    public ReplySerializerFrame(short tag, byte b, int size, byte[] data) {
+    public Short tag;
+    public byte error;
+    public int size;
+    public byte[] data;
+
+    public ReplySerializerFrame(Short tag, byte error, int size, byte[] data) {
+        this.tag = tag;
+        this.error = error;
+        this.size = size;
+        this.data = data.clone();
     }
 }

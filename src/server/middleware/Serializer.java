@@ -3,6 +3,7 @@ package server.middleware;
 import server.frames.ReplySerializerFrame;
 import server.frames.SerializerFrame;
 
+import java.io.*;
 import java.net.Socket;
 
 public class Serializer {
@@ -14,10 +15,31 @@ public class Serializer {
     }
 
     public SerializerFrame receive() {
+        try {
+            DataInputStream dis = new DataInputStream(new BufferedInputStream(socket.getInputStream()));
+            Short tag = dis.readShort();
+            byte opCode = dis.readByte();
+            int dataSize = dis.readInt();
+            byte[] data = new byte[dataSize];
+            dis.readFully(data);
+            //dis.close();
+            return new SerializerFrame(tag, opCode, dataSize, data);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         return null;
     }
 
     public void send(ReplySerializerFrame reply) {
-
+        try {
+            DataOutputStream dos = new DataOutputStream(new BufferedOutputStream(socket.getOutputStream()));
+            dos.writeShort(reply.tag);
+            dos.writeByte(reply.error);
+            dos.writeInt(reply.size);
+            dos.write(reply.data);
+            dos.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
