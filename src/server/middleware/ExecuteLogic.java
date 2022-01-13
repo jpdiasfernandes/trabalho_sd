@@ -1,4 +1,4 @@
-package server.stub;
+package server.middleware;
 
 import server.businesslogic.excecoes.*;
 import server.businesslogic.GestaoLN;

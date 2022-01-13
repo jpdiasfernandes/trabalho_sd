@@ -1,6 +1,9 @@
-package server.stub;
+package server.middleware;
+
+import server.frames.SerializerFrame;
 
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
@@ -10,10 +13,10 @@ public class BoundedBuffer {
     Lock l = new ReentrantLock();
     Condition notEmpty = l.newCondition();
     Condition notFull = l.newCondition();
-    Queue<Object> queue = new LinkedList<>();
+    Queue<Map.Entry<Integer, SerializerFrame>> queue = new LinkedList<>();
     public final int N = 150;
 
-    Object get() throws InterruptedException {
+    Map.Entry<Integer, SerializerFrame> get() throws InterruptedException {
         l.lock();
         while(queue.isEmpty())
             notEmpty.await();
@@ -26,11 +29,11 @@ public class BoundedBuffer {
         }
     }
 
-    void put(Object obj) throws InterruptedException {
+    void put(SerializerFrame obj, int id) throws InterruptedException {
         l.lock();
         while(queue.size() >= N)
             notFull.await();
-        queue.add(obj);
+        queue.add(Map.entry(id, obj));
         notEmpty.signal();
         l.unlock();
     }
