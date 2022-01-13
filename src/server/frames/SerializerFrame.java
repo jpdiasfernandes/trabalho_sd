@@ -6,8 +6,6 @@ public class SerializerFrame {
     public int size;
     public byte[] data;
 
-    public String token;
-
     public SerializerFrame(short tag, int opCode, int size, byte[] data) {
         this.tag = tag;
         this.opCode = opCode;

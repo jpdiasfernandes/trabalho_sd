@@ -6,13 +6,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class FrameReservarViagem {
+    public String token;
     public LocalDate requestDataInicial;
     public LocalDate requestDataFinal;
     public List<String> requestDestinos;
     public int replyCodReserva;
     public String replyError;
 
-    public FrameReservarViagem(LocalDate requestDataInicial, LocalDate requestDataFinal, List<String> requestDestinos) {
+    public FrameReservarViagem(String token, LocalDate requestDataInicial, LocalDate requestDataFinal, List<String> requestDestinos) {
+        this.token = token;
         this.requestDataInicial = requestDataInicial;
         this.requestDataFinal = requestDataFinal;
         this.requestDestinos = requestDestinos;
@@ -21,6 +23,7 @@ public class FrameReservarViagem {
     public static FrameReservarViagem deserialize(byte[] data) throws IOException {
         ByteArrayInputStream bais = new ByteArrayInputStream(data);
         DataInputStream das = new DataInputStream(bais);
+        String token = das.readUTF();
         LocalDate dataInicial = LocalDate.parse(das.readUTF());
         LocalDate dataFinal = LocalDate.parse(das.readUTF());
         int max = das.readInt();
@@ -30,7 +33,7 @@ public class FrameReservarViagem {
         }
         das.close();
         bais.close();
-        return new FrameReservarViagem(dataInicial, dataFinal, destinos);
+        return new FrameReservarViagem(token, dataInicial, dataFinal, destinos);
     }
 
     public void initializeReply(int codReserva){

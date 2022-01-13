@@ -90,7 +90,7 @@ public class ExecuteLogic implements Runnable{
                         e.printStackTrace();
                     }
                     try{
-                        gestaoLN.insercaoVoo(middleware.getUserName(frame.token),frameInserirVoo.requestOrigem,frameInserirVoo.requestDestino,frameInserirVoo.requestCapacidade);
+                        gestaoLN.insercaoVoo(middleware.getUserName(frameInserirVoo.token),frameInserirVoo.requestOrigem,frameInserirVoo.requestDestino,frameInserirVoo.requestCapacidade);
                         ReplySerializerFrame r = new ReplySerializerFrame(frame.tag, (byte) 0x1, 0, null);
                         middleware.putResponse(r, id);
                     }catch (NaoTemPermissaoException | UsernameNaoExistenteException e){
@@ -134,7 +134,7 @@ public class ExecuteLogic implements Runnable{
                         e.printStackTrace();
                     }
                     try {
-                        int codReserva = gestaoLN.reservarViagem(middleware.getUserName(frame.token),frameReservarViagem.requestDataInicial,frameReservarViagem.requestDataFinal,frameReservarViagem.requestDestinos);
+                        int codReserva = gestaoLN.reservarViagem(middleware.getUserName(frameReservarViagem.token),frameReservarViagem.requestDataInicial,frameReservarViagem.requestDataFinal,frameReservarViagem.requestDestinos);
                         frameReservarViagem.initializeReply(codReserva);
                         try {
                             byte[] replyReply = frameReservarViagem.serializeReply();
@@ -162,7 +162,7 @@ public class ExecuteLogic implements Runnable{
                         e.printStackTrace();
                     }
                     try {
-                        gestaoLN.cancelarReserva(middleware.getUserName(frame.token),frameCancelarReserva.requestCodReserva);
+                        gestaoLN.cancelarReserva(middleware.getUserName(frameCancelarReserva.token),frameCancelarReserva.requestCodReserva);
                         ReplySerializerFrame r = new ReplySerializerFrame(frame.tag, (byte) 0x1, 0, null);
                         middleware.putResponse(r, id);
                     }catch (UsernameNaoExistenteException | VooIndisponivelException e){
@@ -177,7 +177,12 @@ public class ExecuteLogic implements Runnable{
                     }
                     break;
                 case(6):
-                    FramePedirVoos framePedirVoos = new FramePedirVoos();
+                    FramePedirVoos framePedirVoos = null;
+                    try {
+                        framePedirVoos = FramePedirVoos.deserialize(frame.data);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                     List<Map.Entry<String, String>> voos = gestaoLN.getVoos();
                     framePedirVoos.initializeReply(voos);
                     try {
