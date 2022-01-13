@@ -1,11 +1,10 @@
-package server.stub;
+package server.middleware;
 
 import server.frames.ReplySerializerFrame;
 import server.frames.SerializerFrame;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
