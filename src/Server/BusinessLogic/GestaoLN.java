@@ -55,7 +55,7 @@ public class GestaoLN {
         lm.unlock(voos);
     }
 
-    private boolean admin(String username) throws UsernameNaoExistenteException {
+    public boolean admin(String username) throws UsernameNaoExistenteException {
         lm.lock(contas, Mode.S);
         Utilizador u = contas.contas.get(username);
         if (u != null) lm.lock(u, Mode.S);
@@ -130,7 +130,7 @@ public class GestaoLN {
 
     }
 
-    public void reservarViagem(String username, LocalDate dataInicial, LocalDate dataFinal, List<String> destinos)
+    public int reservarViagem(String username, LocalDate dataInicial, LocalDate dataFinal, List<String> destinos)
         throws VooIndisponivelException, UsernameNaoExistenteException {
         lm.lock(voos, Mode.X);
         lm.lock(contas, Mode.X);
@@ -143,12 +143,18 @@ public class GestaoLN {
             lm.lock(v, Mode.X);
         }
         lm.unlock(voos);
+
+        // Devolve o primeiro código da primeira viagem.
+        // Pode sempre verificar as suas reservas
+        int r = -1;
         for (Viagem v : viagens) {
+            if (r == -1) r = v.codViagem;
             v.reservas.add(username);
             u.addReserva(v.codViagem);
             lm.unlock(v);
         }
         lm.unlock(u);
+        return r;
     }
 
     public void cancelarReserva(String username, int codViagem) throws UsernameNaoExistenteException, VooIndisponivelException {

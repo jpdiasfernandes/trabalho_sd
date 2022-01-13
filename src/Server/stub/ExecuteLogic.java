@@ -21,7 +21,8 @@ public class ExecuteLogic implements Runnable{
     @Override
     public void run() {
         while(true){
-            SerializerFrame frame = middleware.buffer.consume();
+            //SerializerFrame frame = middleware.buffer.consume();
+            SerializerFrame frame = null;
             switch (frame.opCode){
                 case(0):
                     FrameRegisto frameRegisto = new FrameRegisto();
@@ -62,7 +63,7 @@ public class ExecuteLogic implements Runnable{
                         } catch (IOException ex) {
                             ex.printStackTrace();
                         }
-                    }catch (UsernameExistenteException | UsernameNaoExistenteException /*| PasswordErradaException*/ e){
+                    }catch (UsernameNaoExistenteException | PasswordErradaException e){
                         frameLogin.initializeError(e.getLocalizedMessage());
                         try {
                             byte[] replyError = frameLogin.serializeError();
