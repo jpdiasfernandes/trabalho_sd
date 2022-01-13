@@ -11,6 +11,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 public class AirGroup11Stub implements IAirGroup11 {
     Demultiplexer demultiplexer;
@@ -38,7 +39,7 @@ public class AirGroup11Stub implements IAirGroup11 {
         Request request = new Request((byte) 0x0,data.length,data);
         Reply reply = demultiplexer.service(request);
 
-        if (reply.getError() == (byte) 0x0){
+        if (reply.getError() == (byte) 0x0 && reply.getDataSize() > 0){
             DataInputStream dis = new DataInputStream(new ByteArrayInputStream(reply.getData()));
             String message = null;
             try {
@@ -51,10 +52,10 @@ public class AirGroup11Stub implements IAirGroup11 {
     }
 
     /**
-     *  @returns TOKEN
+     *  @returns <TOKEN,IsADMIN>
      */
     @Override
-    public String login(String username, String password) throws LoginInvalidException {
+    public Map.Entry<String,Boolean> login(String username, String password) throws LoginInvalidException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         DataOutputStream dos = new DataOutputStream(baos);
 
@@ -72,7 +73,7 @@ public class AirGroup11Stub implements IAirGroup11 {
 
         DataInputStream dis = new DataInputStream(new ByteArrayInputStream(reply.getData()));
 
-        if (reply.getError() == (byte) 0x0){
+        if (reply.getError() == (byte) 0x0 && reply.getDataSize() > 0){
             String message = null;
             try {
                 message = dis.readUTF();
@@ -83,12 +84,18 @@ public class AirGroup11Stub implements IAirGroup11 {
         }
 
         String token = null;
+        boolean isAdmin = false;
+        Map.Entry<String,Boolean> loginAnswer = null;
         try {
-            token = dis.readUTF();
+            if (reply.getDataSize() > 0)
+                token = dis.readUTF();
+                isAdmin = dis.readBoolean();
+                loginAnswer = Map.entry(token,isAdmin);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return token;
+
+        return loginAnswer;
     }
 
     @Override
@@ -161,7 +168,7 @@ public class AirGroup11Stub implements IAirGroup11 {
      *  @returns RESERVE CODE
      */
     @Override
-    public String reserveTravel(String token, LocalDateTime start, LocalDateTime end, List<String> places) throws ReserveTravelInvalidException {
+    public int reserveTravel(String token, LocalDateTime start, LocalDateTime end, List<String> places) throws ReserveTravelInvalidException {
         String format = "MM/dd/yyy";
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern(format, Locale.US);
 
@@ -200,9 +207,9 @@ public class AirGroup11Stub implements IAirGroup11 {
                 throw new ReserveTravelInvalidException(message);
             }
 
-            String reserveCode = null;
+            int reserveCode = -1;
             try {
-                reserveCode = dis.readUTF();
+                reserveCode = dis.readInt();
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -211,7 +218,7 @@ public class AirGroup11Stub implements IAirGroup11 {
             e.printStackTrace();
         }
 
-        return null;
+        return -1;
     }
 
     @Override
@@ -231,9 +238,8 @@ public class AirGroup11Stub implements IAirGroup11 {
                 baos.toByteArray());
         Reply reply = demultiplexer.service(request);
 
-        DataInputStream dis = new DataInputStream(new ByteArrayInputStream(reply.getData()));
-
-        if (reply.getError() == (byte) 0x0){
+        if (reply.getError() == (byte) 0x0 && reply.getDataSize() > 0){
+            DataInputStream dis = new DataInputStream(new ByteArrayInputStream(reply.getData()));
             String message = null;
             try {
                 message = dis.readUTF();

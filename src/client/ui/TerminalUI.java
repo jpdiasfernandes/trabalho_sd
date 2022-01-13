@@ -8,6 +8,7 @@ import business.IAirGroup11;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 
 public class TerminalUI {
@@ -47,12 +48,13 @@ public class TerminalUI {
             System.out.print(Colors.ANSI_GREEN + "$"+Colors.ANSI_RESET+" password > ");
             String password = scin.nextLine();
 
-            String token = model.login(username,password);
+            Map.Entry<String,Boolean> loginAnswer = model.login(username,password);
 
-            System.out.println("Obtida reply e o token é: " + token);
+            System.out.println("Obtida reply e o token é: " + loginAnswer.getKey());
 
             Auth auth = Auth.getInstance();
-            auth.setToken(token);
+            auth.setToken(loginAnswer.getKey());
+            auth.setIsAdmin(loginAnswer.getValue());
 
             home();
         }
@@ -81,25 +83,48 @@ public class TerminalUI {
     }
 
     private void home(){
-        // TODO implements admin methods
-        Menu menu = new Menu(
-                "HOME",
-                new String[]{
-                        "Reserve travel",
-                        "Cancel reserve",
-                        "Get all flights",
-                        "Get Routes",
-                        "Notifications"
-                });
+        Auth auth = Auth.getInstance();
+        Menu menu = null;
+
+        if (!auth.isAdmin()) {
+            menu = new Menu(
+                    "HOME",
+                    new String[]{
+                            "Reserve travel",
+                            "Cancel reserve",
+                            "Get all flights",
+                            "Get Routes",
+                            "My reserves"
+                    });
+        }else{
+            menu = new Menu(
+                    "HOME",
+                    new String[]{
+                            "Reserve travel",
+                            "Cancel reserve",
+                            "Get all flights",
+                            "Get Routes",
+                            "My Reserves",
+                            "Insert flight",
+                            "Cancel day"
+                    });
+        }
 
         menu.setHandler(1, ()->reserveTravelHandler());
         menu.setHandler(2, ()->cancelReserveHandler());
         menu.setHandler(3, ()->getAllFlightsHandler());
         menu.setHandler(4, ()->getRoutesHandler());
+        menu.setHandler(5, ()->getMyReserversHandler());
+
+        if (auth.isAdmin()){
+            menu.setHandler(6, ()->insertFlightHandler());
+            menu.setHandler(7, ()->cancelDayHandler());
+        }
 
         menu.run();
     }
 
+    // regular client handlers
     private void reserveTravelHandler(){
 
         // Get time interval
@@ -165,16 +190,15 @@ public class TerminalUI {
 
         String token = Auth.getInstance().getToken();
 
-        // invoke model
-        /*
         try {
-            model.reserveTravel(token,dateStart,dateEnd,places);
+            int reserveCode = model.reserveTravel(token,dateStart,dateEnd,places);
+            System.out.println("Código da reserva: " + reserveCode);
         } catch (ReserveTravelInvalidException e) {
-            e.printStackTrace();
+            System.out.println("Deu erro ... mensagem: ");
+            System.out.println(e.getMessage());
+            //e.printStackTrace();
         }
-        */
     }
-
     private void cancelReserveHandler(){
         // Get reserve code
         System.out.print("\n" + Colors.ANSI_GREEN + "$"+Colors.ANSI_RESET+" reserve code > ");
@@ -183,20 +207,17 @@ public class TerminalUI {
 
         String token = Auth.getInstance().getToken();
 
-        // invoke model
-        /*
         try {
             model.cancelReserve(token,reserveCode);
         } catch (ReserveCancelException e) {
-            e.printStackTrace();
+            System.out.println("Deu erro ... mensagem: ");
+            System.out.println(e.getMessage());
+            //e.printStackTrace();
         }
-         */
     }
-
     private void getAllFlightsHandler(){
 
     }
-
     private void getRoutesHandler(){
         System.out.print("\n" + Colors.ANSI_GREEN + "$"+Colors.ANSI_RESET+" origem > ");
         //scin.nextLine();
@@ -217,5 +238,16 @@ public class TerminalUI {
             e.printStackTrace();
         }
          */
+    }
+    private void getMyReserversHandler(){
+
+    }
+
+    // admin handlers
+    private void insertFlightHandler(){
+
+    }
+    private void cancelDayHandler(){
+
     }
 }
