@@ -1,7 +1,7 @@
-package server.middleware;
+package middleware;
 
-import server.frames.ReplySerializerFrame;
-import server.frames.SerializerFrame;
+import frames.ReplySerializerFrame;
+import frames.SerializerFrame;
 
 import java.net.Socket;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -35,9 +35,11 @@ public class Session {
         // Fazer submit de pedidos
         // Submit = por a request Frame na fila de espera para os workers
         new Thread(()-> {
-            l.lock();
             SerializerFrame req = ser.receive();
-            if (req == null) ss.running = false;
+            l.lock();
+            if (req == null) {
+                ss.running = false;
+            }
             l.unlock();
             while(req != null) {
                 l.lock();
@@ -45,8 +47,13 @@ public class Session {
                 ss.current++;
                 mdl.submit(req, sessionID);
                 c.signal();
+                l.unlock();
                 req = ser.receive();
-                if (req == null) ss.running = false;
+                l.lock();
+                if (req == null) {
+                    ss.running = false;
+                    System.out.println("Deu falso");
+                }
                 l.unlock();
             }
             // O que acontece se a reply tem o lock e é preciso dizer que running é false?
@@ -54,27 +61,32 @@ public class Session {
 
         // Receber replies
         new Thread(()-> {
-            l.lock();
+            System.out.println("Fiz lock");
             try {
                 // Ainda poderá haver mais requests
                 // OU já não há mais novos requests mas ainda é preciso receber
                 // as replies pendentes
+                l.lock();
                 while(ss.running || ss.current != 0) {
-                    while(ss.current == 0 && ss.running == true)
+                    while(ss.current == 0 && ss.running == true) {
+                        System.out.println("Vou adormecer");
                         c.await();
+                    }
 
+                    System.out.println("Me acordaram");
                     if (ss.current != 0 || ss.running == true) {
+                        System.out.println("Vou fazer o Retrieve");
                         ReplySerializerFrame reply = mdl.retrieve(sessionID);
+                        System.out.println("Vou enviar reply");
                         ser.send(reply);
                         ss.current--;
                     }
-
                 }
+                l.unlock();
 
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            l.unlock();
         }).start();
 
 

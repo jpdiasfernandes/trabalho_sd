@@ -1,8 +1,8 @@
-package server.middleware;
+package middleware;
 
-import server.businesslogic.excecoes.*;
-import server.businesslogic.GestaoLN;
-import server.frames.*;
+import businesslogic.excecoes.*;
+import businesslogic.GestaoLN;
+import frames.*;
 
 import java.io.IOException;
 import java.util.List;
@@ -21,11 +21,13 @@ public class ExecuteLogic implements Runnable{
     @Override
     public void run() {
         while(true){
-            //SerializerFrame frame = middleware.buffer.consume();
-            SerializerFrame frame = null;
+            Map.Entry<Integer, SerializerFrame> req = middleware.bufferConsume();
+            int id = req.getKey();
+            SerializerFrame frame = req.getValue();
             switch (frame.opCode){
                 case(0):
                     FrameRegisto frameRegisto = null;
+                    System.out.println("Detectei opcode de registo");
                     try {
                         frameRegisto = FrameRegisto.deserialize(frame.data);
                     } catch (IOException e) {
@@ -33,20 +35,25 @@ public class ExecuteLogic implements Runnable{
                     }
                     try{
                         gestaoLN.registarUtilizador(frameRegisto.requestUsername,frameRegisto.requestPwd);
+                        System.out.println("Registei");
                         ReplySerializerFrame r = new ReplySerializerFrame(frame.tag, (byte) 0x1, 0, null);
-                        //adicionar ao middlware.map
+                        System.out.println("Vou colocar na Response");
+                        middleware.putResponse(r, id);
                     }catch (UsernameExistenteException e){
                         frameRegisto.initializeError(e.getLocalizedMessage());
+                        System.out.println("Já existe");
                         try {
                             byte[] replyError = frameRegisto.serializeError();
                             ReplySerializerFrame r = new ReplySerializerFrame(frame.tag, (byte) 0x0, replyError.length, replyError);
-                            //adicionar ao middlware.map
+                            middleware.putResponse(r, id);
                         } catch (IOException ex) {
                             ex.printStackTrace();
                         }
                     }
+                    break;
                 case(1):
                     FrameLogin frameLogin = null;
+                    System.out.println("Detectei opcode de login");
                     try {
                         frameLogin = FrameLogin.deserialize(frame.data);
                     } catch (IOException e) {
@@ -55,11 +62,12 @@ public class ExecuteLogic implements Runnable{
                     try{
                         gestaoLN.validarUtilizador(frameLogin.requestUsername,frameLogin.requestPwd);
                         boolean admin = gestaoLN.admin(frameLogin.requestUsername);
+                        System.out.println("É admin " + admin);
                         frameLogin.initializeReply(middleware.putToken(frameLogin.requestUsername,frameLogin.requestPwd), admin);
                         try {
                             byte[] replyReply = frameLogin.serializeReply();
                             ReplySerializerFrame r = new ReplySerializerFrame(frame.tag, (byte) 0x1, replyReply.length, replyReply);
-                            //adicionar ao middlware.map
+                            middleware.putResponse(r, id);
                         } catch (IOException ex) {
                             ex.printStackTrace();
                         }
@@ -68,11 +76,12 @@ public class ExecuteLogic implements Runnable{
                         try {
                             byte[] replyError = frameLogin.serializeError();
                             ReplySerializerFrame r = new ReplySerializerFrame(frame.tag, (byte) 0x0, replyError.length, replyError);
-                            //adicionar ao middlware.map
+                            middleware.putResponse(r, id);
                         } catch (IOException ex) {
                             ex.printStackTrace();
                         }
                     }
+                    break;
                 case(2):
                     FrameInserirVoo frameInserirVoo = null;
                     try {
@@ -83,17 +92,18 @@ public class ExecuteLogic implements Runnable{
                     try{
                         gestaoLN.insercaoVoo(middleware.getUserName(frame.token),frameInserirVoo.requestOrigem,frameInserirVoo.requestDestino,frameInserirVoo.requestCapacidade);
                         ReplySerializerFrame r = new ReplySerializerFrame(frame.tag, (byte) 0x1, 0, null);
-                        //adicionar ao middlware.map
+                        middleware.putResponse(r, id);
                     }catch (NaoTemPermissaoException | UsernameNaoExistenteException e){
                         frameInserirVoo.initializeError(e.getLocalizedMessage());
                         try {
                             byte[] replyError = frameInserirVoo.serializeError();
                             ReplySerializerFrame r = new ReplySerializerFrame(frame.tag, (byte) 0x0, replyError.length, replyError);
-                            //adicionar ao middlware.map
+                            middleware.putResponse(r, id);
                         } catch (IOException ex) {
                             ex.printStackTrace();
                         }
                     }
+                    break;
                 case(3):
                     FrameCancelarVoos frameCancelarVoos = null;
                     try {
@@ -104,17 +114,18 @@ public class ExecuteLogic implements Runnable{
                     try{
                         gestaoLN.cancelarDia(frameCancelarVoos.requestData);
                         ReplySerializerFrame r = new ReplySerializerFrame(frame.tag, (byte) 0x1, 0, null);
-                        //adicionar ao middlware.map
+                        middleware.putResponse(r, id);
                     }catch (DataSemVoosException e){
                         frameCancelarVoos.initializeError(e.getLocalizedMessage());
                         try {
                             byte[] replyError = frameCancelarVoos.serializeError();
                             ReplySerializerFrame r = new ReplySerializerFrame(frame.tag, (byte) 0x0, replyError.length, replyError);
-                            //adicionar ao middlware.map
+                            middleware.putResponse(r, id);
                         } catch (IOException ex) {
                             ex.printStackTrace();
                         }
                     }
+                    break;
                 case(4):
                     FrameReservarViagem frameReservarViagem = null;
                     try {
@@ -128,7 +139,7 @@ public class ExecuteLogic implements Runnable{
                         try {
                             byte[] replyReply = frameReservarViagem.serializeReply();
                             ReplySerializerFrame r = new ReplySerializerFrame(frame.tag, (byte) 0x1, replyReply.length, replyReply);
-                            //adicionar ao middlware.map
+                            middleware.putResponse(r, id);
                         } catch (IOException ex) {
                             ex.printStackTrace();
                         }
@@ -137,11 +148,12 @@ public class ExecuteLogic implements Runnable{
                         try {
                             byte[] replyError = frameReservarViagem.serializeError();
                             ReplySerializerFrame r = new ReplySerializerFrame(frame.tag, (byte) 0x0, replyError.length, replyError);
-                            //adicionar ao middlware.map
+                            middleware.putResponse(r, id);
                         } catch (IOException ex) {
                             ex.printStackTrace();
                         }
                     }
+                    break;
                 case(5):
                     FrameCancelarReserva frameCancelarReserva = null;
                     try {
@@ -152,17 +164,18 @@ public class ExecuteLogic implements Runnable{
                     try {
                         gestaoLN.cancelarReserva(middleware.getUserName(frame.token),frameCancelarReserva.requestCodReserva);
                         ReplySerializerFrame r = new ReplySerializerFrame(frame.tag, (byte) 0x1, 0, null);
-                        //adicionar ao middlware.map
+                        middleware.putResponse(r, id);
                     }catch (UsernameNaoExistenteException | VooIndisponivelException e){
                         frameCancelarReserva.initializeError(e.getLocalizedMessage());
                         try {
                             byte[] replyError = frameCancelarReserva.serializeError();
                             ReplySerializerFrame r = new ReplySerializerFrame(frame.tag, (byte) 0x0, replyError.length, replyError);
-                            //adicionar ao middlware.map
+                            middleware.putResponse(r, id);
                         } catch (IOException ex) {
                             ex.printStackTrace();
                         }
                     }
+                    break;
                 case(6):
                     FramePedirVoos framePedirVoos = new FramePedirVoos();
                     List<Map.Entry<String, String>> voos = gestaoLN.getVoos();
@@ -170,10 +183,11 @@ public class ExecuteLogic implements Runnable{
                     try {
                         byte[] replyReply = framePedirVoos.serializeReply();
                         ReplySerializerFrame r = new ReplySerializerFrame(frame.tag, (byte) 0x1, replyReply.length, replyReply);
-                        //adicionar ao middlware.map
+                        middleware.putResponse(r, id);
                     } catch (IOException ex) {
                         ex.printStackTrace();
                     }
+                    break;
                 case(7):
 
                 break;

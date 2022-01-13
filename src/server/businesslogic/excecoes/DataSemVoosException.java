@@ -1,4 +1,4 @@
-package server.businesslogic.excecoes;
+package businesslogic.excecoes;
 
 public class DataSemVoosException extends Exception {
     public DataSemVoosException() {

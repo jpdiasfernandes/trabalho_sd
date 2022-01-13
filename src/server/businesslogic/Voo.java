@@ -1,4 +1,4 @@
-package server.businesslogic;
+package businesslogic;
 
 public class Voo {
     public final String origem;

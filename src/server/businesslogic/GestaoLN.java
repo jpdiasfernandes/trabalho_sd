@@ -1,6 +1,6 @@
-package server.businesslogic;
+package businesslogic;
 
-import server.businesslogic.excecoes.*;
+import businesslogic.excecoes.*;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -34,10 +34,12 @@ public class GestaoLN {
         lm.unlock(contas);
         if (u == null) throw new UsernameNaoExistenteException("Username " + username + " não existente");
         try {
-            return u.password.equals(pwd);
+            if (!u.password.equals(pwd)) throw new PasswordErradaException("Password errada.");
         } finally {
             lm.unlock(u);
         }
+
+        return true;
     }
 
     public void insercaoVoo(String username, String origem, String destino, int capacidade)

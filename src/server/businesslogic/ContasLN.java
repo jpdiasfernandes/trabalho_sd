@@ -1,6 +1,6 @@
-package server.businesslogic;
+package businesslogic;
 
-import server.businesslogic.excecoes.UsernameNaoExistenteException;
+import businesslogic.excecoes.UsernameNaoExistenteException;
 
 import java.util.HashMap;
 import java.util.Map;

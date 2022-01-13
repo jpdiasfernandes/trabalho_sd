@@ -1,9 +1,7 @@
-package server;
-
-import server.businesslogic.GestaoLN;
-import server.middleware.ExecuteLogic;
-import server.middleware.Middleware;
-import server.middleware.Session;
+import businesslogic.GestaoLN;
+import middleware.ExecuteLogic;
+import middleware.Middleware;
+import middleware.Session;
 
 import java.io.IOException;
 import java.net.ServerSocket;

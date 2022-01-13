@@ -1,4 +1,4 @@
-package server.businesslogic;
+package businesslogic;
 
 import java.time.LocalDate;
 import java.util.HashSet;

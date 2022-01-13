@@ -1,4 +1,4 @@
-package server.frames;
+package frames;
 
 import java.io.*;
 

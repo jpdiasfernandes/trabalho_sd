@@ -1,4 +1,4 @@
-package server.businesslogic;
+package businesslogic;
 
 public class Admnistrador extends Utilizador {
     public Admnistrador(String username, String password) {

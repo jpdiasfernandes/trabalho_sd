@@ -1,7 +1,7 @@
-package server.businesslogic;
+package businesslogic;
 
-import server.businesslogic.excecoes.DataSemVoosException;
-import server.businesslogic.excecoes.VooIndisponivelException;
+import businesslogic.excecoes.DataSemVoosException;
+import businesslogic.excecoes.VooIndisponivelException;
 
 import java.time.LocalDate;
 import java.util.*;

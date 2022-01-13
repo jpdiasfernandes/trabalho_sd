@@ -1,7 +1,7 @@
-package server.middleware;
+package middleware;
 
-import server.frames.ReplySerializerFrame;
-import server.frames.SerializerFrame;
+import frames.ReplySerializerFrame;
+import frames.SerializerFrame;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -65,6 +65,7 @@ public class Middleware {
             e.printStackTrace();
             return null;
         } finally {
+            responseMap.remove(sessionID);
             responseL.unlock();
         }
     }

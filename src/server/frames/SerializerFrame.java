@@ -1,4 +1,4 @@
-package server.frames;
+package frames;
 
 public class SerializerFrame {
     public short tag;

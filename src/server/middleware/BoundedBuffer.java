@@ -1,6 +1,6 @@
-package server.middleware;
+package middleware;
 
-import server.frames.SerializerFrame;
+import frames.SerializerFrame;
 
 import java.util.LinkedList;
 import java.util.Map;

@@ -1,4 +1,4 @@
-package server.frames;
+package frames;
 
 public class ReplySerializerFrame {
     public Short tag;
@@ -10,6 +10,6 @@ public class ReplySerializerFrame {
         this.tag = tag;
         this.error = error;
         this.size = size;
-        this.data = data.clone();
+        this.data = data;
     }
 }

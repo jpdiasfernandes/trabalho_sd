@@ -1,7 +1,7 @@
-package server.middleware;
+package middleware;
 
-import server.frames.ReplySerializerFrame;
-import server.frames.SerializerFrame;
+import frames.ReplySerializerFrame;
+import frames.SerializerFrame;
 
 import java.io.*;
 import java.net.Socket;
@@ -36,7 +36,8 @@ public class Serializer {
             dos.writeShort(reply.tag);
             dos.writeByte(reply.error);
             dos.writeInt(reply.size);
-            dos.write(reply.data);
+            if (reply.size != 0)
+                dos.write(reply.data);
             dos.flush();
         } catch (IOException e) {
             e.printStackTrace();

@@ -1,4 +1,4 @@
-package server.businesslogic.excecoes;
+package businesslogic.excecoes;
 
 public class NaoTemPermissaoException extends Exception {
     public NaoTemPermissaoException() {
