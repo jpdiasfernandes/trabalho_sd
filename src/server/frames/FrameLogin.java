@@ -3,23 +3,30 @@ package server.frames;
 import java.io.*;
 
 public class FrameLogin {
-    public String replyToken;
-    public boolean replyAdmin;
     public String requestUsername;
     public String requestPwd;
+    public String replyToken;
+    public boolean replyAdmin;
+
     public String replyError;
 
     public FrameLogin(){
 
     }
 
-    public void deserialize(byte[] data) throws IOException {
+    public FrameLogin(String requestUsername, String requestPwd) {
+        this.requestUsername = requestUsername;
+        this.requestPwd = requestPwd;
+    }
+
+    public static FrameLogin deserialize(byte[] data) throws IOException {
         ByteArrayInputStream bais = new ByteArrayInputStream(data);
         DataInputStream das = new DataInputStream(bais);
-        this.requestUsername = das.readUTF();
-        this.requestPwd = das.readUTF();
+        String username = das.readUTF();
+        String pwd = das.readUTF();
         das.close();
         bais.close();
+        return new FrameLogin(username,pwd);
     }
 
     public void intializeRequest(String requestUsername, String requestPwd){

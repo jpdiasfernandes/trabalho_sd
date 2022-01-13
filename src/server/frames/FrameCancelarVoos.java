@@ -7,12 +7,17 @@ public class FrameCancelarVoos {
     public LocalDate requestData;
     String replyError;
 
-    public void deserialize(byte[] data) throws IOException {
+    public FrameCancelarVoos(LocalDate requestData) {
+        this.requestData = requestData;
+    }
+
+    public static FrameCancelarVoos deserialize(byte[] data) throws IOException {
         ByteArrayInputStream bais = new ByteArrayInputStream(data);
         DataInputStream das = new DataInputStream(bais);
-        this.requestData = LocalDate.parse(das.readUTF());
+        LocalDate localDate = LocalDate.parse(das.readUTF());
         das.close();
         bais.close();
+        return new FrameCancelarVoos(localDate);
     }
 
     public void initializeError(String replyError){

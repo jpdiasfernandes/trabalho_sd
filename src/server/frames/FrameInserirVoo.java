@@ -8,14 +8,21 @@ public class FrameInserirVoo {
     public int requestCapacidade;
     public String replyError;
 
-    public void deserialize(byte[] data) throws IOException {
+    public FrameInserirVoo(String requestOrigem, String requestDestino, int requestCapacidade) {
+        this.requestOrigem = requestOrigem;
+        this.requestDestino = requestDestino;
+        this.requestCapacidade = requestCapacidade;
+    }
+
+    public static FrameInserirVoo deserialize(byte[] data) throws IOException {
         ByteArrayInputStream bais = new ByteArrayInputStream(data);
         DataInputStream das = new DataInputStream(bais);
-        this.requestOrigem = das.readUTF();
-        this.requestDestino = das.readUTF();
-        this.requestCapacidade = das.readInt();
+        String origem = das.readUTF();
+        String destino = das.readUTF();
+        int capacidade = das.readInt();
         das.close();
         bais.close();
+        return new FrameInserirVoo(origem, destino, capacidade);
     }
 
     public void initializeError(String replyError){

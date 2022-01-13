@@ -6,12 +6,17 @@ public class FrameCancelarReserva {
     public int requestCodReserva;
     public String replyError;
 
-    public void deserialize(byte[] data) throws IOException {
+    public FrameCancelarReserva(int requestCodReserva) {
+        this.requestCodReserva = requestCodReserva;
+    }
+
+    public static FrameCancelarReserva deserialize(byte[] data) throws IOException {
         ByteArrayInputStream bais = new ByteArrayInputStream(data);
         DataInputStream das = new DataInputStream(bais);
-        this.requestCodReserva = das.readInt();
+        int codReserva = das.readInt();
         das.close();
         bais.close();
+        return new FrameCancelarReserva(codReserva);
     }
 
     public void initializeError(String replyError){

@@ -7,16 +7,19 @@ public class FrameRegisto {
     public String requestPwd;
     public String replyError;
 
-    public FrameRegisto() {
+    public FrameRegisto(String requestUsername, String requestPwd) {
+        this.requestUsername = requestUsername;
+        this.requestPwd = requestPwd;
     }
 
-    public void deserialize(byte[] data) throws IOException {
+    public static FrameRegisto deserialize(byte[] data) throws IOException {
         ByteArrayInputStream bais = new ByteArrayInputStream(data);
         DataInputStream das = new DataInputStream(bais);
-        this.requestUsername = das.readUTF();
-        this.requestPwd = das.readUTF();
+        String username = das.readUTF();
+        String pwd = das.readUTF();
         das.close();
         bais.close();
+        return new FrameRegisto(username, pwd);
     }
 
     public void initializeError(String replyError){

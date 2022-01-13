@@ -12,18 +12,25 @@ public class FrameReservarViagem {
     public int replyCodReserva;
     public String replyError;
 
-    public void deserialize(byte[] data) throws IOException {
+    public FrameReservarViagem(LocalDate requestDataInicial, LocalDate requestDataFinal, List<String> requestDestinos) {
+        this.requestDataInicial = requestDataInicial;
+        this.requestDataFinal = requestDataFinal;
+        this.requestDestinos = requestDestinos;
+    }
+
+    public static FrameReservarViagem deserialize(byte[] data) throws IOException {
         ByteArrayInputStream bais = new ByteArrayInputStream(data);
         DataInputStream das = new DataInputStream(bais);
-        this.requestDataInicial = LocalDate.parse(das.readUTF());
-        this.requestDataFinal = LocalDate.parse(das.readUTF());
+        LocalDate dataInicial = LocalDate.parse(das.readUTF());
+        LocalDate dataFinal = LocalDate.parse(das.readUTF());
         int max = das.readInt();
-        this.requestDestinos = new ArrayList<>();
+        List<String> destinos = new ArrayList<>();
         for (int i = 0; i < max; i++) {
-            this.requestDestinos.add(das.readUTF());
+            destinos.add(das.readUTF());
         }
         das.close();
         bais.close();
+        return new FrameReservarViagem(dataInicial, dataFinal, destinos);
     }
 
     public void initializeReply(int codReserva){

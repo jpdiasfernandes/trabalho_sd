@@ -25,9 +25,9 @@ public class ExecuteLogic implements Runnable{
             SerializerFrame frame = null;
             switch (frame.opCode){
                 case(0):
-                    FrameRegisto frameRegisto = new FrameRegisto();
+                    FrameRegisto frameRegisto = null;
                     try {
-                        frameRegisto.deserialize(frame.data);
+                        frameRegisto = FrameRegisto.deserialize(frame.data);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -46,9 +46,9 @@ public class ExecuteLogic implements Runnable{
                         }
                     }
                 case(1):
-                    FrameLogin frameLogin = new FrameLogin();
+                    FrameLogin frameLogin = null;
                     try {
-                        frameLogin.deserialize(frame.data);
+                        frameLogin = FrameLogin.deserialize(frame.data);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -74,9 +74,9 @@ public class ExecuteLogic implements Runnable{
                         }
                     }
                 case(2):
-                    FrameInserirVoo frameInserirVoo = new FrameInserirVoo();
+                    FrameInserirVoo frameInserirVoo = null;
                     try {
-                        frameInserirVoo.deserialize(frame.data);
+                        frameInserirVoo = FrameInserirVoo.deserialize(frame.data);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -95,9 +95,9 @@ public class ExecuteLogic implements Runnable{
                         }
                     }
                 case(3):
-                    FrameCancelarVoos frameCancelarVoos = new FrameCancelarVoos();
+                    FrameCancelarVoos frameCancelarVoos = null;
                     try {
-                        frameCancelarVoos.deserialize(frame.data);
+                        frameCancelarVoos = FrameCancelarVoos.deserialize(frame.data);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -116,9 +116,9 @@ public class ExecuteLogic implements Runnable{
                         }
                     }
                 case(4):
-                    FrameReservarViagem frameReservarViagem = new FrameReservarViagem();
+                    FrameReservarViagem frameReservarViagem = null;
                     try {
-                        frameReservarViagem.deserialize(frame.data);
+                        frameReservarViagem = FrameReservarViagem.deserialize(frame.data);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -143,9 +143,9 @@ public class ExecuteLogic implements Runnable{
                         }
                     }
                 case(5):
-                    FrameCancelarReserva frameCancelarReserva = new FrameCancelarReserva();
+                    FrameCancelarReserva frameCancelarReserva = null;
                     try {
-                        frameCancelarReserva.deserialize(frame.data);
+                        frameCancelarReserva = FrameCancelarReserva.deserialize(frame.data);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
