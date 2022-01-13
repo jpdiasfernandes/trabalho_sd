@@ -32,6 +32,8 @@ public class Session {
         Lock l = new ReentrantLock();
         Condition c = l.newCondition();
 
+        // Fazer submit de pedidos
+        // Submit = por a request Frame na fila de espera para os workers
         new Thread(()-> {
             l.lock();
             SerializerFrame req = ser.receive();
@@ -41,8 +43,8 @@ public class Session {
                 l.lock();
                 //TODO: verificar se este req está a devolver nulo caso a ligação feche
                 ss.current++;
-                c.signal();
                 mdl.submit(req, sessionID);
+                c.signal();
                 req = ser.receive();
                 if (req == null) ss.running = false;
                 l.unlock();
@@ -50,6 +52,7 @@ public class Session {
             // O que acontece se a reply tem o lock e é preciso dizer que running é false?
         }).start();
 
+        // Receber replies
         new Thread(()-> {
             l.lock();
             try {
@@ -60,7 +63,7 @@ public class Session {
                     while(ss.current == 0 && ss.running == true)
                         c.await();
 
-                    if (ss.current != 0) {
+                    if (ss.current != 0 || ss.running == true) {
                         ReplySerializerFrame reply = mdl.retrieve(sessionID);
                         ser.send(reply);
                         ss.current--;
