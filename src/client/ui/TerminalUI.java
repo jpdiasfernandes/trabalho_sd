@@ -249,7 +249,7 @@ public class TerminalUI {
 
             System.out.println("\n");
             for (Map.Entry<Integer,Integer> reserve: reserveCodes){
-                System.out.println(Colors.ANSI_GREEN + "Code: " + Colors.ANSI_RESET + reserve.getKey() + Colors.ANSI_YELLOW +  " & " + Colors.ANSI_GREEN +  "Quantity: " + Colors.ANSI_RESET + reserve.getValue());
+                System.out.println(Colors.ANSI_GREEN + "Code: " + Colors.ANSI_RESET + reserve.getValue() + Colors.ANSI_YELLOW +  " & " + Colors.ANSI_GREEN +  "Quantity: " + Colors.ANSI_RESET + reserve.getKey());
             }
             System.out.println("\n");
 

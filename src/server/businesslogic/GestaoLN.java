@@ -166,7 +166,13 @@ public class GestaoLN {
         Viagem v = voos.getViagem(codViagem);
         lm.lock(v, Mode.X);
         lm.unlock(voos);
-        u.reservas.remove(codViagem);
+        for (int i = 0; i < u.reservas.size(); i++) {
+            if (u.reservas.get(i) == codViagem) {
+                u.reservas.remove(i);
+                break;
+            }
+
+        }
         lm.unlock(u);
         v.reservas.remove(username);
         lm.unlock(v);
