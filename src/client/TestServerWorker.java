@@ -1,9 +1,8 @@
-import business.Connection.Reply;
+import connection.Reply;
 import ui.Colors;
 
 import java.io.*;
 import java.net.Socket;
-import java.nio.charset.StandardCharsets;
 
 public
 class TestServerWorker implements Runnable{
@@ -37,6 +36,7 @@ class TestServerWorker implements Runnable{
                 if (opcode == (byte)0x1) answerLogin(data,tag);
                 if (opcode == (byte)0x4) answerReserve(data,tag);
                 if (opcode == (byte)0x5) answerCancelReserve(data,tag);
+                if (opcode == (byte)0x6) answerAllFlights(data,tag);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -177,6 +177,43 @@ class TestServerWorker implements Runnable{
                 (byte) 0x1,
                 0,
                 null
+        );
+
+        DataOutputStream dos2 = new DataOutputStream(s.getOutputStream());
+        System.out.println("Enviando a Reply...");
+        dos2.write(r.deserialize());
+        dos2.flush();
+        System.out.println("Reply foi enviada");
+    }
+    private void answerAllFlights(byte[] data,Short tag) throws IOException {
+        System.out.println(Colors.ANSI_GREEN + "Foi detetado um Request allFlights!" + Colors.ANSI_RESET);
+        // o que vem a seguir é feito caso for detetado o opcode de cancel reserve
+        DataInputStream dis = new DataInputStream(new ByteArrayInputStream(data));
+        String token = dis.readUTF();
+        System.out.println("Consegui ler o token!");
+
+        System.out.println("TOKEN: " + token);
+
+        System.out.println("Preparando a Reply...");
+
+        //String errorMessage = "Credenciais inválidas";
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        DataOutputStream dos = new DataOutputStream(baos);
+        //dos.writeUTF(errorMessage);
+        dos.writeInt(3);
+        dos.writeUTF("barcelona");
+        dos.writeUTF("Braga");
+        dos.writeUTF("Santos");
+        dos.writeUTF("Dubai");
+        dos.writeUTF("Lisboa");
+        dos.writeUTF("Porto");
+
+        Reply r = new Reply(
+                tag,
+                (byte) 0x1,
+                baos.toByteArray().length,
+                baos.toByteArray()
         );
 
         DataOutputStream dos2 = new DataOutputStream(s.getOutputStream());

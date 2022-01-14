@@ -1,11 +1,11 @@
 package business;
 
-import business.Connection.Reply;
-import business.Connection.Request;
+import connection.Demultiplexer;
+import connection.Reply;
+import connection.Request;
 import business.Exceptions.*;
 
 import java.io.*;
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -196,7 +196,10 @@ public class AirGroup11Stub implements IAirGroup11 {
                     baos.toByteArray());
             Reply reply = demultiplexer.service(request);
 
-            DataInputStream dis = new DataInputStream(new ByteArrayInputStream(reply.getData()));
+            DataInputStream dis = null;
+            if (reply.getDataSize() > 0) {
+                dis = new DataInputStream(new ByteArrayInputStream(reply.getData()));
+            }
 
             if (reply.getError() == (byte) 0x0){
                 String message = null;
@@ -366,7 +369,7 @@ public class AirGroup11Stub implements IAirGroup11 {
     }
 
     /**
-     *  @returns Entry<Quantity,ReserveCode>
+     *  @returns List<Entry<Quantity,ReserveCode>>
      */
     @Override
     public List<Map.Entry<Integer,Integer>> getMyReserves(String token) throws GetMyReservesException{

@@ -1,6 +1,5 @@
-package business.Connection;
+package connection;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;

@@ -3,6 +3,7 @@ package ui;
 import business.AirGroup11Stub;
 import business.Auth;
 import business.Exceptions.*;
+import business.Flight;
 import business.IAirGroup11;
 
 import java.time.LocalDateTime;
@@ -61,8 +62,7 @@ public class TerminalUI {
         catch (NullPointerException e) {
             e.printStackTrace();
         } catch (LoginInvalidException e) {
-            System.out.print("Deu erro ... mensagem: ");
-            System.out.println(e.getMessage());
+            System.out.println(Colors.ANSI_YELLOW + "[ERROR] " + Colors.ANSI_RESET + e.getMessage());
             //e.printStackTrace();
         }
     }
@@ -76,8 +76,7 @@ public class TerminalUI {
         try {
             model.register(username,password);
         } catch (RegisterInvalidException e) {
-            System.out.print("Deu erro ... mensagem: ");
-            System.out.println(e.getMessage());
+            System.out.println(Colors.ANSI_YELLOW + "[ERROR] " + Colors.ANSI_RESET + e.getMessage());
             //e.printStackTrace();
         }
     }
@@ -124,7 +123,7 @@ public class TerminalUI {
         menu.run();
     }
 
-    // Regular client handlers
+    /* Regular client handlers */
 
     // DONE
     private void reserveTravelHandler(){
@@ -192,15 +191,22 @@ public class TerminalUI {
 
         String token = Auth.getInstance().getToken();
 
-        try {
-            int reserveCode = model.reserveTravel(token,dateStart,dateEnd,places);
-            System.out.println("Código da reserva: " + reserveCode);
-        } catch (ReserveTravelInvalidException e) {
-            System.out.println("Deu erro ... mensagem: ");
-            System.out.println(e.getMessage());
-            //e.printStackTrace();
-        }
+        System.out.println("\nO sistema está a processar sua reserva ...\n" +
+                "Caso for bem sucedida, encontrará dentro de alguns instantes o código de sua reserva na secção " +
+                Colors.ANSI_GREEN + "my reserves" + Colors.ANSI_RESET);
+
+        new Thread(() -> {
+            try {
+                int reserveCode = model.reserveTravel(token,dateStart,dateEnd,places);
+                //System.out.println("Código da reserva: " + reserveCode);
+            } catch (ReserveTravelInvalidException e) {
+                //System.out.println(Colors.ANSI_YELLOW + "[ERROR] " + Colors.ANSI_RESET + e.getMessage());
+                //e.printStackTrace();
+            }
+
+        }).start();
     }
+    // DONE
     private void cancelReserveHandler(){
         // Get reserve code
         System.out.print("\n" + Colors.ANSI_GREEN + "$"+Colors.ANSI_RESET+" reserve code > ");
@@ -212,13 +218,29 @@ public class TerminalUI {
         try {
             model.cancelReserve(token,reserveCode);
         } catch (ReserveCancelException e) {
-            System.out.println("Deu erro ... mensagem: ");
-            System.out.println(e.getMessage());
+            System.out.println(Colors.ANSI_YELLOW + "[ERROR] " + Colors.ANSI_RESET + e.getMessage());
             //e.printStackTrace();
         }
     }
     private void getAllFlightsHandler(){
+        Auth auth = Auth.getInstance();
 
+        try {
+            List<Flight> allFlights = model.getAllFlights(auth.getToken());
+            int i = 0;
+            for (Flight flight: allFlights){
+                System.out.println(
+                        Colors.ANSI_YELLOW + "["+i+"] "+
+                        Colors.ANSI_CYAN + "(Origem) " +
+                        Colors.ANSI_RESET + flight.getOrig() +
+                        " -> " + Colors.ANSI_CYAN + "(destino) " + Colors.ANSI_RESET + flight.getDest()
+                );
+                i++;
+            }
+        } catch (GetFlightsException e) {
+            System.out.println(Colors.ANSI_YELLOW + "[ERROR] " + Colors.ANSI_RESET + e.getMessage());
+            //e.printStackTrace();
+        }
     }
     private void getRoutesHandler(){
         System.out.print("\n" + Colors.ANSI_GREEN + "$"+Colors.ANSI_RESET+" origem > ");
@@ -237,10 +259,11 @@ public class TerminalUI {
         try {
             model.getRoutes(token,orig,dest);
         } catch (GetRoutesException e) {
-            e.printStackTrace();
+             System.out.println(Colors.ANSI_YELLOW + "[ERROR] " + Colors.ANSI_RESET + e.getMessage());
         }
          */
     }
+    // DONE
     private void getMyReserversHandler(){
         Auth auth = Auth.getInstance();
 
@@ -254,13 +277,11 @@ public class TerminalUI {
             System.out.println("\n");
 
         } catch (GetMyReservesException e) {
-            System.out.print("Deu erro ... mensagem: ");
-            System.out.println(e.getMessage());
-            // e.printStackTrace();
+            System.out.println(Colors.ANSI_YELLOW + "[ERROR] " + Colors.ANSI_RESET + e.getMessage());
         }
     }
 
-    // Admin handlers
+    /* Admin handlers */
     private void insertFlightHandler(){
         System.out.print("\n" + Colors.ANSI_GREEN + "$"+Colors.ANSI_RESET+" origem > ");
         String orig = scin.nextLine();
@@ -278,8 +299,7 @@ public class TerminalUI {
         try {
             model.insertFlight(auth.getToken(),orig,destin,capacity);
         } catch (InsertFlightInvalidException e) {
-            System.out.print("Deu erro ... mensagem: ");
-            System.out.println(e.getMessage());
+            System.out.println(Colors.ANSI_YELLOW + "[ERROR] " + Colors.ANSI_RESET + e.getMessage());
             //e.printStackTrace();
         }
     }
@@ -298,8 +318,7 @@ public class TerminalUI {
         try {
             model.cancelDay(auth.getToken(),date);
         } catch (CancelDayInvalidException e) {
-            System.out.print("Deu erro ... mensagem: ");
-            System.out.println(e.getMessage());
+            System.out.println(Colors.ANSI_YELLOW + "[ERROR] " + Colors.ANSI_RESET + e.getMessage());
             //e.printStackTrace();
         }
     }

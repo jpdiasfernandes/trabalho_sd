@@ -1,4 +1,4 @@
-package business.Connection;
+package connection;
 
 public class Request {
     private Short tag;

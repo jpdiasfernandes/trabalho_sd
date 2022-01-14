@@ -1,8 +1,4 @@
-package business;
-
-import business.Connection.Reply;
-import business.Connection.Request;
-import business.Connection.TaggedConnection;
+package connection;
 
 import java.io.*;
 import java.net.Socket;
