@@ -7,6 +7,8 @@ import frames.*;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 
 public class ExecuteLogic implements Runnable{
@@ -195,7 +197,30 @@ public class ExecuteLogic implements Runnable{
                     break;
                 case(7):
 
-                break;
+                    break;
+                case(8):
+                    FrameReservas frameReservas = null;
+                    try {
+                        frameReservas = FrameReservas.deserialize(frame.data);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    String username = middleware.getUserName(frameReservas.token);
+                    try {
+                        Set<Map.Entry<Integer, Integer>> reservas = gestaoLN.getReserves(username);
+                        List<Map.Entry<Integer, Integer>> r = reservas.stream().collect(Collectors.toList());
+                        frameReservas.initializeReply(r);
+                    } catch (UsernameNaoExistenteException e ) {
+                        e.printStackTrace();
+                    }
+                    try {
+                        byte[] replyReply = frameReservas.serializeReply();
+                        ReplySerializerFrame r = new ReplySerializerFrame(frame.tag, (byte) 0x1, replyReply.length, replyReply);
+                        middleware.putResponse(r, id);
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
+                    }
+                    break;
             }
         }
     }
