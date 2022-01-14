@@ -39,7 +39,7 @@ public class VoosLN {
 
     public Set<Viagem> getViagensData(LocalDate data) throws DataSemVoosException {
         Map<Map.Entry<String, String>, Integer> mapViagens = datasVoos.get(data);
-        Set<Viagem> viagens = new TreeSet<>();
+        Set<Viagem> viagens = new HashSet<>();
         if (mapViagens == null) throw new DataSemVoosException("Esta data não tem nenhum voo");
         for (Integer codViagem : mapViagens.values()) {
             Viagem v = this.viagens.get(codViagem);

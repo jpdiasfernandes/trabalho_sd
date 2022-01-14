@@ -19,6 +19,7 @@ public class Flight {
     public Flight(String orig, String dest, Short capacity) {
         this.orig = orig;
         this.dest = dest;
+        this.capacity = capacity;
     }
 
 

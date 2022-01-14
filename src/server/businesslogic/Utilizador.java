@@ -22,7 +22,11 @@ public class Utilizador {
         reservas.add(codViagem);
     }
 
-    public void removeDiaReserva(LocalDate data) {
-        reservas.remove(data);
+    public void removeReserva(int codViagem) {
+        int size = reservas.size();
+        for(int i = 0; i < size; i++) {
+            if (reservas.get(i) == codViagem)
+                reservas.remove(i);
+        }
     }
 }

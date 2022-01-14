@@ -6,10 +6,10 @@ public class FrameInserirVoo {
     public String token;
     public String requestOrigem;
     public String requestDestino;
-    public int requestCapacidade;
+    public short requestCapacidade;
     public String replyError;
 
-    public FrameInserirVoo(String token, String requestOrigem, String requestDestino, int requestCapacidade) {
+    public FrameInserirVoo(String token, String requestOrigem, String requestDestino, short requestCapacidade) {
         this.token = token;
         this.requestOrigem = requestOrigem;
         this.requestDestino = requestDestino;
@@ -22,7 +22,7 @@ public class FrameInserirVoo {
         String token = das.readUTF();
         String origem = das.readUTF();
         String destino = das.readUTF();
-        int capacidade = das.readInt();
+        short capacidade = das.readShort();
         das.close();
         bais.close();
         return new FrameInserirVoo(token, origem, destino, capacidade);

@@ -102,29 +102,33 @@ public class GestaoLN {
     public void cancelarDia(LocalDate data) throws DataSemVoosException {
         // No fim fazer refactor para tirar este lock do this
         // Se se fizer um lock ordenado sempre lock voos e depois contas não é preciso
-        lm.lock(this, Mode.X);
         lm.lock(voos, Mode.X);
-        lm.lock(this.contas, Mode.X);
-        lm.unlock(this);
+        System.out.println("Locked voos");
+        lm.lock(contas, Mode.X);
+        System.out.println("Locked contas");
         Set<String> usernames = voos.getUsernamesData(data);
+        Set<Viagem> viagensData = voos.getViagensData(data);
         voos.removeDia(data);
+        System.out.println("Removi DIA");
         lm.unlock(voos);
-        Set<Utilizador> contas = new TreeSet<>();
+        Set<Utilizador> contasT = new HashSet<>();
 
         // Ainda consigo otimizar isto
         try {
             for(String username : usernames) {
                 Utilizador u = this.contas.getConta(username);
-                contas.add(u);
+                contasT.add(u);
             }
-            contas.stream().sorted().forEach(u-> lm.lock(u, Mode.X));
+            contasT.stream().sorted().forEach(u-> lm.lock(u, Mode.X));
         } catch (UsernameNaoExistenteException e) {
             e.printStackTrace();
         }
-        lm.unlock(this.contas);
+        lm.unlock(contas);
         // Se calhar depois pode-se criar notificações
-        for (Utilizador u : contas) {
-            u.removeDiaReserva(data);
+        for (Utilizador u : contasT) {
+            for (Viagem viagem : viagensData)
+                u.removeReserva(viagem.codViagem);
+            System.out.println("Removi DIA do utilizador");
             lm.unlock(u);
         }
 
