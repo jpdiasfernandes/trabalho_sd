@@ -15,4 +15,5 @@ public interface IAirGroup11 {
     void cancelReserve(String token, int reserveCod) throws ReserveCancelException;
     List<Flight> getAllFlights(String token) throws GetFlightsException;
     List<Route> getRoutes(String token, String orig,String dest) throws GetRoutesException;
+    List<Map.Entry<Integer,Integer>> getMyReserves(String token) throws GetMyReservesException;
 }

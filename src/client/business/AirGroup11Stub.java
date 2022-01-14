@@ -165,7 +165,7 @@ public class AirGroup11Stub implements IAirGroup11 {
     }
 
     /**
-     *  @returns RESERVE CODE
+     *  @returns FIRST TRAVEL RESERVE CODE
      */
     @Override
     public int reserveTravel(String token, LocalDateTime start, LocalDateTime end, List<String> places) throws ReserveTravelInvalidException {
@@ -358,6 +358,59 @@ public class AirGroup11Stub implements IAirGroup11 {
             }
 
             return routes;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    /**
+     *  @returns Entry<Quantity,ReserveCode>
+     */
+    @Override
+    public List<Map.Entry<Integer,Integer>> getMyReserves(String token) throws GetMyReservesException{
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        DataOutputStream dos = new DataOutputStream(baos);
+
+        try {
+            dos.writeUTF(token);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        Request request = new Request((byte) 0x8,
+                baos.toByteArray().length,
+                baos.toByteArray());
+        Reply reply = demultiplexer.service(request);
+
+        ByteArrayInputStream bais = new ByteArrayInputStream(reply.getData());
+        DataInputStream dis = new DataInputStream(bais);
+
+        if (reply.getError() == (byte) 0x0){
+            String message = null;
+            try {
+                message = dis.readUTF();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            throw new GetMyReservesException(message);
+        }
+
+        try {
+            int numberOfPairs = dis.readInt();
+
+            List<Map.Entry<Integer,Integer>> reservesCodes = new ArrayList<>();
+            for (int i = 0; i < numberOfPairs; i++){
+
+                int quant = dis.readInt();
+                int code = dis.readInt();
+
+                Map.Entry<Integer,Integer> newEntry = Map.entry(quant,code);
+                reservesCodes.add(newEntry);
+            }
+
+            return reservesCodes;
         } catch (IOException e) {
             e.printStackTrace();
         }

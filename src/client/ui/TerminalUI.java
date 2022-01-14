@@ -26,7 +26,6 @@ public class TerminalUI {
         this.menuPrincipal();
     }
 
-
     private void menuPrincipal() {
         Menu menu = new Menu(
                 "INÍCIO",
@@ -41,6 +40,7 @@ public class TerminalUI {
         menu.run();
     }
 
+    // DONE
     private void loginHandler(){
         try {
             System.out.print("\n" +Colors.ANSI_GREEN + "$"+Colors.ANSI_RESET+" username > ");
@@ -50,7 +50,7 @@ public class TerminalUI {
 
             Map.Entry<String,Boolean> loginAnswer = model.login(username,password);
 
-            System.out.println("Obtida reply e o token é: " + loginAnswer.getKey());
+            //System.out.println("Obtida reply e o token é: " + loginAnswer.getKey());
 
             Auth auth = Auth.getInstance();
             auth.setToken(loginAnswer.getKey());
@@ -66,7 +66,7 @@ public class TerminalUI {
             //e.printStackTrace();
         }
     }
-
+    // DONE
     private void registerHandler(){
         System.out.print("\n" +Colors.ANSI_GREEN + "$"+Colors.ANSI_RESET+" username > ");
         String username = scin.nextLine();
@@ -124,7 +124,9 @@ public class TerminalUI {
         menu.run();
     }
 
-    // regular client handlers
+    // Regular client handlers
+
+    // DONE
     private void reserveTravelHandler(){
 
         // Get time interval
@@ -240,14 +242,65 @@ public class TerminalUI {
          */
     }
     private void getMyReserversHandler(){
+        Auth auth = Auth.getInstance();
 
+        try {
+            List<Map.Entry<Integer,Integer>> reserveCodes = model.getMyReserves(auth.getToken());
+
+            System.out.println("\n");
+            for (Map.Entry<Integer,Integer> reserve: reserveCodes){
+                System.out.println(Colors.ANSI_GREEN + "Code: " + Colors.ANSI_RESET + reserve.getKey() + Colors.ANSI_YELLOW +  " & " + Colors.ANSI_GREEN +  "Quantity: " + Colors.ANSI_RESET + reserve.getValue());
+            }
+            System.out.println("\n");
+
+        } catch (GetMyReservesException e) {
+            System.out.print("Deu erro ... mensagem: ");
+            System.out.println(e.getMessage());
+            // e.printStackTrace();
+        }
     }
 
-    // admin handlers
+    // Admin handlers
     private void insertFlightHandler(){
+        System.out.print("\n" + Colors.ANSI_GREEN + "$"+Colors.ANSI_RESET+" origem > ");
+        String orig = scin.nextLine();
+        System.out.print(Colors.ANSI_GREEN + "$"+Colors.ANSI_RESET+" destino > ");
+        String destin = scin.nextLine();
+        System.out.print(Colors.ANSI_GREEN + "$"+Colors.ANSI_RESET+" capacidade > ");
+        Short capacity = scin.nextShort();
 
+        System.out.println("Orig:" + orig);
+        System.out.println("Dest:" + destin);
+        System.out.println("Capacity:" + capacity);
+
+        Auth auth = Auth.getInstance();
+
+        try {
+            model.insertFlight(auth.getToken(),orig,destin,capacity);
+        } catch (InsertFlightInvalidException e) {
+            System.out.print("Deu erro ... mensagem: ");
+            System.out.println(e.getMessage());
+            //e.printStackTrace();
+        }
     }
     private void cancelDayHandler(){
+        System.out.print("\n" + Colors.ANSI_GREEN + "$"+Colors.ANSI_RESET+" day(start) > ");
+        int day = scin.nextInt();
+        System.out.print(Colors.ANSI_GREEN + "$"+Colors.ANSI_RESET+" month(start) > ");
+        int month = scin.nextInt();
+        System.out.print(Colors.ANSI_GREEN + "$"+Colors.ANSI_RESET+" year(start) > ");
+        int year = scin.nextInt();
 
+        LocalDateTime date = LocalDateTime.of(year,month,day,0,0);
+
+        Auth auth = Auth.getInstance();
+
+        try {
+            model.cancelDay(auth.getToken(),date);
+        } catch (CancelDayInvalidException e) {
+            System.out.print("Deu erro ... mensagem: ");
+            System.out.println(e.getMessage());
+            //e.printStackTrace();
+        }
     }
 }
