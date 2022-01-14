@@ -22,7 +22,7 @@ public class FrameReservas {
         return new FrameReservas(token);
     }
 
-    public static void initializeReply(List<Map.Entry<Integer, Integer>> replyReservas){
+    public void initializeReply(List<Map.Entry<Integer, Integer>> replyReservas){
         this.replyReservas = replyReservas;
     }
 
