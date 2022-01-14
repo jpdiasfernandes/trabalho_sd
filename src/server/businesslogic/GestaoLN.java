@@ -142,23 +142,31 @@ public class GestaoLN {
         lm.lock(u, Mode.X);
         lm.unlock(contas);
         List<Map.Entry<String, String>> viagensAReservar = voos.getOrigemDestino(destinos);
-        List<Viagem> viagens = voos.getViagensIntervalo(viagensAReservar, dataInicial, dataFinal);
-        for (Viagem v : viagens) {
-            lm.lock(v, Mode.X);
-        }
-        lm.unlock(voos);
+        List<Viagem> viagens;
+        try {
 
-        // Devolve o primeiro código da primeira viagem.
-        // Pode sempre verificar as suas reservas
-        int r = -1;
-        for (Viagem v : viagens) {
-            if (r == -1) r = v.codViagem;
-            v.reservas.add(username);
-            u.addReserva(v.codViagem);
-            lm.unlock(v);
+            try {
+                viagens = voos.getViagensIntervalo(viagensAReservar, dataInicial, dataFinal);
+                for (Viagem v : viagens) {
+                    lm.lock(v, Mode.X);
+                }
+            } finally {
+                lm.unlock(voos);
+            }
+
+            // Devolve o primeiro código da primeira viagem.
+            // Pode sempre verificar as suas reservas
+            int r = -1;
+            for (Viagem v : viagens) {
+                if (r == -1) r = v.codViagem;
+                v.reservas.add(username);
+                u.addReserva(v.codViagem);
+                lm.unlock(v);
+            }
+            return r;
+        } finally {
+            lm.unlock(u);
         }
-        lm.unlock(u);
-        return r;
     }
 
     public void cancelarReserva(String username, int codViagem) throws UsernameNaoExistenteException, VooIndisponivelException {
