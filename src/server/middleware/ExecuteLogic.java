@@ -195,7 +195,24 @@ public class ExecuteLogic implements Runnable{
                     break;
                 case(7):
 
-                break;
+                    break;
+                case(8):
+                    FrameReservas frameReservas = null;
+                    try {
+                        frameReservas = FrameReservas.deserialize(frame.data);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    List<Map.Entry<Integer, Integer>> reservas = gestaoLN.metodo();
+                    FrameReservas.initializeReply(reservas);
+                    try {
+                        byte[] replyReply = frameReservas.serializeReply();
+                        ReplySerializerFrame r = new ReplySerializerFrame(frame.tag, (byte) 0x1, replyReply.length, replyReply);
+                        middleware.putResponse(r, id);
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
+                    }
+                    break;
             }
         }
     }
