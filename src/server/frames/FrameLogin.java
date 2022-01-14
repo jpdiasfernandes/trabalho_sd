@@ -3,7 +3,6 @@ package frames;
 import java.io.*;
 
 public class FrameLogin {
-    public String token;
     public String requestUsername;
     public String requestPwd;
     public String replyToken;
@@ -15,8 +14,7 @@ public class FrameLogin {
 
     }
 
-    public FrameLogin(String token, String requestUsername, String requestPwd) {
-        this.token = token;
+    public FrameLogin(String requestUsername, String requestPwd) {
         this.requestUsername = requestUsername;
         this.requestPwd = requestPwd;
     }
@@ -24,12 +22,11 @@ public class FrameLogin {
     public static FrameLogin deserialize(byte[] data) throws IOException {
         ByteArrayInputStream bais = new ByteArrayInputStream(data);
         DataInputStream das = new DataInputStream(bais);
-        String token = das.readUTF();
         String username = das.readUTF();
         String pwd = das.readUTF();
         das.close();
         bais.close();
-        return new FrameLogin(token,username,pwd);
+        return new FrameLogin(username,pwd);
     }
 
     public void intializeRequest(String requestUsername, String requestPwd){

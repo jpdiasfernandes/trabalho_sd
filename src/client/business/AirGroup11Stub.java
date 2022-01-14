@@ -187,6 +187,7 @@ public class AirGroup11Stub implements IAirGroup11 {
             dos.writeShort(placesLength.shortValue());
 
             for(String place: places){
+                System.out.println(place);
                 dos.writeUTF(place);
             }
 

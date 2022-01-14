@@ -2,8 +2,10 @@ package frames;
 
 import java.io.*;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class FrameReservarViagem {
     public String token;
@@ -21,12 +23,14 @@ public class FrameReservarViagem {
     }
 
     public static FrameReservarViagem deserialize(byte[] data) throws IOException {
+        String format = "MM/dd/yyy";
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern(format, Locale.US);
         ByteArrayInputStream bais = new ByteArrayInputStream(data);
         DataInputStream das = new DataInputStream(bais);
         String token = das.readUTF();
-        LocalDate dataInicial = LocalDate.parse(das.readUTF());
-        LocalDate dataFinal = LocalDate.parse(das.readUTF());
-        int max = das.readInt();
+        LocalDate dataInicial = LocalDate.parse(das.readUTF(), dateFormatter);
+        LocalDate dataFinal = LocalDate.parse(das.readUTF(), dateFormatter);
+        short max = das.readShort();
         List<String> destinos = new ArrayList<>();
         for (int i = 0; i < max; i++) {
             destinos.add(das.readUTF());

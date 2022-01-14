@@ -31,6 +31,10 @@ public class VoosLN {
         Voo portoOlso = new Voo("Porto", "Oslo", 160);
         Voo portoKongsberg = new Voo("Porto", "Kongsberg", 135);
         Voo portoGoteborg = new Voo("Porto", "Goteborg", 160);
+        voos.put(Map.entry(barcelonaPorto.origem, barcelonaPorto.destino), barcelonaPorto);
+        voos.put(Map.entry(portoEstocolmo.origem, portoEstocolmo.destino), portoEstocolmo);
+        this.datasVoos = new HashMap<>();
+        this.viagens = new HashMap<>();
     }
 
     public Set<Viagem> getViagensData(LocalDate data) throws DataSemVoosException {
@@ -68,7 +72,17 @@ public class VoosLN {
     }
 
     public List<Map.Entry<String, String>> getOrigemDestino(List<String> destinos) {
-        return null;
+        List<Map.Entry<String, String>> pairs = new ArrayList<>();
+        String last = destinos.remove(0);
+        int size = destinos.size();
+        System.out.println("SIZE LIST : " + size);
+        for (int i = 0; i < size; i++) {
+            String destino = destinos.remove(0);
+            pairs.add(Map.entry(last, destino));
+            last = destino;
+        }
+        System.out.println("SIZE LIST AFTER : " + pairs.size());
+        return pairs;
     }
 
     public List<Viagem> getViagensIntervalo(List<Map.Entry<String,String>> viagensAReservar, LocalDate dataInicial, LocalDate dataFinal)
@@ -94,7 +108,6 @@ public class VoosLN {
     private Viagem reservarViagemIntervalo(Map.Entry<String, String> origemDestino, LocalDate dataInicial, LocalDate dataFinal)
             throws VooIndisponivelException {
         List<LocalDate> datasDisponiveis = intervaloDatas(dataInicial, dataFinal);
-        if (datasDisponiveis.size() == 0)
 
         for(LocalDate ld : datasDisponiveis) {
             try {
@@ -110,7 +123,8 @@ public class VoosLN {
     }
 
     private List<LocalDate> intervaloDatas(LocalDate dataInicial, LocalDate dataFinal) {
-        return dataInicial.datesUntil(dataFinal).collect(Collectors.toList());
+        LocalDate ld = dataFinal.plusDays(1);
+        return dataInicial.datesUntil(ld).collect(Collectors.toList());
     }
 
     public Viagem getOrCreateViagem(Map.Entry<String, String> origemDestino, LocalDate data) throws VooIndisponivelException {
@@ -118,9 +132,14 @@ public class VoosLN {
         Viagem v;
         if (!voos.containsKey(origemDestino)) throw new VooIndisponivelException("Voo não existe.");
         Map<Map.Entry<String, String>, Integer> voosData = datasVoos.get(data);
+        if (voosData == null) {
+            datasVoos.put(data, new HashMap<>());
+            voosData = datasVoos.get(data);
+        }
         if ((codViagem = voosData.get(origemDestino)) == null) {
+            System.out.println("Estou a criar um novo dia de viagens");
             v = new Viagem(voos.get(origemDestino), data);
-            viagens.put(codViagem, v);
+            viagens.put(v.codViagem, v);
             voosData.put(origemDestino, v.codViagem);
             //Não me lembro se é preciso fazer o put outra vez, mas acho que não era preciso
             datasVoos.put(data, voosData);
