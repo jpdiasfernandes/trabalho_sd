@@ -6,18 +6,7 @@ import businesslogic.excecoes.UnlockSemLockException;
 import java.util.*;
 import java.util.concurrent.locks.*;
 
-enum Mode {
-    IS(0), IX(1), S(2), X(3);
 
-    private int id;
-    Mode(int id) {
-        this.id = id;
-    }
-
-    public int getID() {
-        return id;
-    }
-}
 
 class ModeState {
     Mode mode;
@@ -87,7 +76,7 @@ class LockState {
     }
 }
 public class LockManager {
-    private GestaoLN gestao;
+    //private GestaoLN gestao;
     Map<Object, LockState> locks;
     private Lock l = new ReentrantLock();
     private Condition c = l.newCondition();
@@ -100,8 +89,7 @@ public class LockManager {
     };
 
 
-    public LockManager(GestaoLN gestao) {
-        this.gestao = gestao;
+    public LockManager() {
         this.locks = new HashMap<>();
     }
 
@@ -307,10 +295,11 @@ public class LockManager {
 
     public void lock(Object obj, Mode mode) {
         l.lock();
-        //System.out.println("LOCK MODE : " + mode);
+        System.out.println("LOCK MODE : " + mode);
         LockState ls = locks.get(obj);
         if (ls == null) {
             ls = new LockState();
+            System.out.println("Criei LS");
             locks.put(obj, ls);
         }
 
@@ -326,7 +315,7 @@ public class LockManager {
             default:
                 break;
         }
-        //System.out.println("Unlocked");
+        System.out.println("locked");
     }
 
     public void unlock(Object obj) {
@@ -335,7 +324,7 @@ public class LockManager {
 
         Mode mode = ls.getModeRemove(Thread.currentThread().getId());
 
-        //System.out.println("MODE : " + mode);
+        System.out.println("MODE : " + mode);
         l.unlock();
         switch (mode) {
             case S :
@@ -349,6 +338,6 @@ public class LockManager {
 
         }
 
-        //System.out.println("Unlocked");
+        System.out.println("Unlocked");
     }
 }

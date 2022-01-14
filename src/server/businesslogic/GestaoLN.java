@@ -6,7 +6,7 @@ import java.time.LocalDate;
 import java.util.*;
 
 public class GestaoLN {
-    LockManager lm = new LockManager(this);
+    LockManager lm = new LockManager();
     public ContasLN contas = new ContasLN();
     public VoosLN voos = new VoosLN();
 
