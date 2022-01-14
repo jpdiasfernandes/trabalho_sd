@@ -1,6 +1,7 @@
 package businesslogic;
 
 import businesslogic.excecoes.*;
+import jdk.jshell.execution.Util;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -183,7 +184,26 @@ public class GestaoLN {
         return r;
     }
 
+    public Set<Map.Entry<Integer, Integer>> getReserves(String username) throws UsernameNaoExistenteException {
+        lm.lock(contas, Mode.S);
+        Utilizador u = contas.getConta(username);
+        lm.lock(u, Mode.S);
+        lm.unlock(contas);
+        Map<Integer, Integer> aux = new HashMap<>();
+        Set<Map.Entry<Integer, Integer>> r = new HashSet<>();
+        for (int codReserva : u.reservas) {
+            Integer quant;
+            if((quant = aux.get(codReserva)) == null) {
+                aux.put(codReserva, 1);
+            } else aux.put(codReserva, quant + 1);
+        }
+        lm.unlock(u);
 
+        for (Map.Entry<Integer, Integer> me : aux.entrySet())
+            r.add(Map.entry(me.getValue(), me.getKey()));
+
+        return r;
+    }
 
 
 
