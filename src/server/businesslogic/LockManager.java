@@ -323,6 +323,9 @@ public class LockManager {
         LockState ls = locks.get(obj);
 
         Mode mode = ls.getModeRemove(Thread.currentThread().getId());
+        if (ls.current == 0) {
+            locks.remove(ls);
+        }
 
         System.out.println("MODE : " + mode);
         l.unlock();
