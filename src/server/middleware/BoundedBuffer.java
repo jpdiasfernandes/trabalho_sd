@@ -9,14 +9,18 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class BoundedBuffer {
+public class BoundedBuffer<T> {
     Lock l = new ReentrantLock();
     Condition notEmpty = l.newCondition();
     Condition notFull = l.newCondition();
-    Queue<Map.Entry<Integer, SerializerFrame>> queue = new LinkedList<>();
-    public final int N = 150;
+    Queue<T> queue = new LinkedList<>();
+    private final int N;
 
-    Map.Entry<Integer, SerializerFrame> get() throws InterruptedException {
+    public BoundedBuffer(int N) {
+        this.N = N;
+    }
+
+    T get() throws InterruptedException {
         l.lock();
         while(queue.isEmpty())
             notEmpty.await();
@@ -29,11 +33,11 @@ public class BoundedBuffer {
         }
     }
 
-    void put(SerializerFrame obj, int id) throws InterruptedException {
+    void put(T t) throws InterruptedException {
         l.lock();
         while(queue.size() >= N)
             notFull.await();
-        queue.add(Map.entry(id, obj));
+        queue.add(t);
         notEmpty.signal();
         l.unlock();
     }

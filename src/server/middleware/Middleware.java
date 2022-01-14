@@ -1,5 +1,7 @@
 package middleware;
 
+import businesslogic.LockManager;
+import businesslogic.Mode;
 import frames.ReplySerializerFrame;
 import frames.SerializerFrame;
 
@@ -10,15 +12,16 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class Middleware {
-    public BoundedBuffer buffer;
-    public Map<Integer, ReplySerializerFrame> responseMap;
-    public Map<String,String> tokens; //token,username
+    public BoundedBuffer<Map.Entry<Integer, SerializerFrame>> workersBuffer;
+    public HashMap<Integer, BoundedBuffer<ReplySerializerFrame>> responseMap;
+    public HashMap<String,String> tokens; //token,username
     private Lock tokenL = new ReentrantLock();
     private Lock responseL = new ReentrantLock();
-    private Condition responseCond = responseL.newCondition();
+    private final int workersBufferN = 150;
+    private final int replyBufferN = 5;
 
     public Middleware() {
-        this.buffer = new BoundedBuffer();
+        this.workersBuffer = new BoundedBuffer<>(workersBufferN);
         this.responseMap = new HashMap<>();
         this.tokens = new HashMap<>();
     }
@@ -26,7 +29,9 @@ public class Middleware {
     //TODO adicionar controlo de concorrência
     public String putToken(String username, String pwd){
         String token = username + pwd;
+        tokenL.lock();
         tokens.put(token, username);
+        tokenL.unlock();
         return token;
     }
 
@@ -40,7 +45,14 @@ public class Middleware {
 
     public void submit(SerializerFrame f, int sessionID) {
         try {
-            buffer.put(f, sessionID);
+            responseL.lock();
+            BoundedBuffer<ReplySerializerFrame> b = responseMap.get(sessionID);
+            if (b == null) {
+                responseMap.put(sessionID, new BoundedBuffer<>(replyBufferN));
+            }
+            responseL.unlock();
+
+            workersBuffer.put(Map.entry(sessionID, f));
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -48,31 +60,31 @@ public class Middleware {
 
     public void putResponse(ReplySerializerFrame reply, int sessionID) {
         responseL.lock();
-        responseMap.put(sessionID, reply);
-        responseCond.signal();
+        BoundedBuffer<ReplySerializerFrame> b = responseMap.get(sessionID);
+        try {
+            b.put(reply);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         responseL.unlock();
     }
     public ReplySerializerFrame retrieve(int sessionID) {
         responseL.lock();
+        BoundedBuffer<ReplySerializerFrame> b = responseMap.get(sessionID);
+        responseL.unlock();
+
         try {
-            ReplySerializerFrame reply = responseMap.get(sessionID);
-            while(reply == null) {
-                responseCond.await();
-                reply = responseMap.get(sessionID);
-            }
+            ReplySerializerFrame reply = b.get();
             return reply;
         } catch (InterruptedException e) {
             e.printStackTrace();
             return null;
-        } finally {
-            responseMap.remove(sessionID);
-            responseL.unlock();
         }
     }
 
     public Map.Entry<Integer, SerializerFrame> bufferConsume() {
         try {
-            return buffer.get();
+            return workersBuffer.get();
         } catch (InterruptedException e) {
             e.printStackTrace();
             return null;
