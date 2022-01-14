@@ -228,9 +228,10 @@ public class TerminalUI {
         try {
             List<Flight> allFlights = model.getAllFlights(auth.getToken());
             int i = 0;
+            System.out.print("\n");
             for (Flight flight: allFlights){
                 System.out.println(
-                        Colors.ANSI_YELLOW + "["+i+"] "+
+                        Colors.ANSI_YELLOW + "("+i+") "+
                         Colors.ANSI_CYAN + "(Origem) " +
                         Colors.ANSI_RESET + flight.getOrig() +
                         " -> " + Colors.ANSI_CYAN + "(destino) " + Colors.ANSI_RESET + flight.getDest()
@@ -270,11 +271,11 @@ public class TerminalUI {
         try {
             List<Map.Entry<Integer,Integer>> reserveCodes = model.getMyReserves(auth.getToken());
 
-            System.out.println("\n");
+            System.out.print("\n");
             for (Map.Entry<Integer,Integer> reserve: reserveCodes){
                 System.out.println(Colors.ANSI_GREEN + "Code: " + Colors.ANSI_RESET + reserve.getValue() + Colors.ANSI_YELLOW +  " & " + Colors.ANSI_GREEN +  "Quantity: " + Colors.ANSI_RESET + reserve.getKey());
             }
-            System.out.println("\n");
+            //System.out.println("\n");
 
         } catch (GetMyReservesException e) {
             System.out.println(Colors.ANSI_YELLOW + "[ERROR] " + Colors.ANSI_RESET + e.getMessage());

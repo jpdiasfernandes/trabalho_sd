@@ -32,11 +32,11 @@ public class Demultiplexer implements Runnable{
             var reply = tagged.receive();
             // transparência
             if (reply != null){
-                System.out.println("Chegou uma resposta e ela é diferente de null!");
+                //System.out.println("Chegou uma resposta e ela é diferente de null!");
                 l.lock();
                 try {
                     replies.put(reply.getTag(), reply);
-                    System.out.println("Vou acordar a TAG: " + reply.getTag());
+                    //System.out.println("Vou acordar a TAG: " + reply.getTag());
                     conditions.get(reply.getTag()).signal();
                 }finally {
                     l.unlock();
@@ -53,10 +53,10 @@ public class Demultiplexer implements Runnable{
         try{
             l.lock();
             tagSend = currentTag;
-            System.out.println("TAG atual: " + tagSend);
+            //System.out.println("TAG atual: " + tagSend);
             Condition c = this.l.newCondition();
             conditions.put(tagSend,c);
-            System.out.println("Enviei o request e vou adormecer até chegar o reply");
+            //System.out.println("Enviei o request e vou adormecer até chegar o reply");
             tagged.send(tagSend,request);
             currentTag++;
 
@@ -66,13 +66,13 @@ public class Demultiplexer implements Runnable{
                 }catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                System.out.println("Me acordaram! Reply chegou, vou pegar a reply com tag: " + tagSend);
+                //System.out.println("Me acordaram! Reply chegou, vou pegar a reply com tag: " + tagSend);
                 reply = replies.get(tagSend);
 
                 if (reply != null) {
-                    System.out.println("... E a reply é diferente de null!");
+                    //System.out.println("... E a reply é diferente de null!");
                 }else{
-                    System.out.println("Fogo, afinal me acordaram e deram-me algo nulo :(");
+                    //System.out.println("Fogo, afinal me acordaram e deram-me algo nulo :(");
                 }
             }
         }finally {
