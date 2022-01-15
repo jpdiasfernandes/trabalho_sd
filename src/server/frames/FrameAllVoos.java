@@ -34,7 +34,12 @@ public class FrameAllVoos {
     public byte[] serializeReply() throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         DataOutputStream dos = new DataOutputStream(new BufferedOutputStream(baos));
-        dos.writeInt(replyRoutes.size());
+        int counter = 0;
+        for (List<String> ls : replyRoutes) {
+            counter += ls.size() + 2;
+        }
+
+        dos.writeInt(counter);
         for (List<String> route : replyRoutes) {
             dos.writeUTF(requestOrigem);
             for (String local : route) {

@@ -28,11 +28,23 @@ public class VoosLN {
         Voo barcelonaPorto = new Voo("Barcelona", "Porto", 140);
         Voo lisboaSydney = new Voo("Lisboa", "Sydney", 450);
         Voo portoEstocolmo = new Voo("Porto", "Estocolmo", 150);
-        Voo portoOlso = new Voo("Porto", "Oslo", 160);
+        Voo portoOslo = new Voo("Porto", "Oslo", 160);
         Voo portoKongsberg = new Voo("Porto", "Kongsberg", 135);
         Voo portoGoteborg = new Voo("Porto", "Goteborg", 160);
+        Voo barcelonaLisboa = new Voo("Barcelona", "Lisboa", 120);
+        Voo lisboaGoteborg = new Voo("Lisboa", "Goteborg", 135);
+        Voo goteborgEstocolmo = new Voo("Goteborg", "Estocolmo", 140);
+
         voos.put(Map.entry(barcelonaPorto.origem, barcelonaPorto.destino), barcelonaPorto);
         voos.put(Map.entry(portoEstocolmo.origem, portoEstocolmo.destino), portoEstocolmo);
+        voos.put(Map.entry(lisboaSydney.origem, lisboaSydney.destino), lisboaSydney);
+        voos.put(Map.entry(portoOslo.origem, portoOslo.destino), portoOslo);
+        voos.put(Map.entry(portoKongsberg.origem, portoKongsberg.destino), portoKongsberg);
+        voos.put(Map.entry(portoGoteborg.origem, portoGoteborg.destino), portoGoteborg);
+        voos.put(Map.entry(barcelonaLisboa.origem, barcelonaLisboa.destino), barcelonaLisboa);
+        voos.put(Map.entry(lisboaGoteborg.origem, lisboaGoteborg.destino), lisboaGoteborg);
+        voos.put(Map.entry(goteborgEstocolmo.origem, goteborgEstocolmo.destino), goteborgEstocolmo);
+
         this.datasVoos = new HashMap<>();
         this.viagens = new HashMap<>();
     }
@@ -49,9 +61,9 @@ public class VoosLN {
         return viagens;
     }
 
-    public Set<String> getUsernamesData(LocalDate data) throws DataSemVoosException {
+    public List<String> getUsernamesData(LocalDate data) throws DataSemVoosException {
         Map<Map.Entry<String, String>, Integer> mapViagens = datasVoos.get(data);
-        Set<String> usernames = new TreeSet<>();
+        List<String> usernames = new ArrayList<>();
         if (mapViagens == null) throw new DataSemVoosException("Esta data não tem nenhum voo");
         for (Integer codViagem : mapViagens.values()) {
             Viagem v = this.viagens.get(codViagem);

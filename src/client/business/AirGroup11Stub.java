@@ -336,7 +336,6 @@ public class AirGroup11Stub implements IAirGroup11 {
 
         try {
             int numberOfPlaces = dis.readInt();
-            System.out.println("Number of UTFS: " + numberOfPlaces);
 
             boolean readOrigin = false;
             boolean readDest = false;
@@ -348,13 +347,11 @@ public class AirGroup11Stub implements IAirGroup11 {
             for (int i = 0; i < numberOfPlaces; i++){
 
                 String tmpPlace = dis.readUTF();
-                System.out.println("tmpPlace: " + tmpPlace);
 
                 if(tmpPlace.equals(orig)) readOrigin = true;
                 if(tmpPlace.equals(dest)) readDest = true;
 
                 if (!lastPlace.equals("") && readOrigin == false){
-                    System.out.println("Vou criar voo");
                     Flight tmpFlight = new Flight(lastPlace,tmpPlace);
                     tmpRoute.insert(tmpFlight);
                 }

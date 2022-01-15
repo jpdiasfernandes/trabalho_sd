@@ -46,12 +46,16 @@ public class GestaoLN {
     public void insercaoVoo(String username, String origem, String destino, int capacidade)
             throws NaoTemPermissaoException, UsernameNaoExistenteException {
         lm.lock(this, Mode.X);
-        if (!admin(username)) throw new NaoTemPermissaoException("Username " + username + " não tem permissão para" +
-                " inserir um voo");
-        lm.lock(voos, Mode.X);
-        lm.unlock(this);
+        try {
+            if (!admin(username)) throw new NaoTemPermissaoException("Username " + username + " não tem permissão para" +
+                    " inserir um voo");
+            lm.lock(voos, Mode.X);
+        } finally {
+            lm.unlock(this);
+        }
         Voo v = new Voo(origem, destino, capacidade);
         voos.voos.put(Map.entry(origem, destino), v);
+
         lm.unlock(voos);
     }
 
@@ -103,32 +107,40 @@ public class GestaoLN {
         // No fim fazer refactor para tirar este lock do this
         // Se se fizer um lock ordenado sempre lock voos e depois contas não é preciso
         lm.lock(voos, Mode.X);
-        System.out.println("Locked voos");
         lm.lock(contas, Mode.X);
-        System.out.println("Locked contas");
-        Set<String> usernames = voos.getUsernamesData(data);
-        Set<Viagem> viagensData = voos.getViagensData(data);
-        voos.removeDia(data);
-        System.out.println("Removi DIA");
-        lm.unlock(voos);
-        Set<Utilizador> contasT = new HashSet<>();
-
-        // Ainda consigo otimizar isto
+        List<String> usernames = null;
+        Set<Viagem> viagensData = null;
+        Set<Utilizador> contasT;
         try {
-            for(String username : usernames) {
-                Utilizador u = this.contas.getConta(username);
-                contasT.add(u);
+            try {
+                usernames = voos.getUsernamesData(data);
+                viagensData = voos.getViagensData(data);
+                voos.removeDia(data);
+            } finally {
+                lm.unlock(voos);
             }
-            contasT.stream().sorted().forEach(u-> lm.lock(u, Mode.X));
-        } catch (UsernameNaoExistenteException e) {
-            e.printStackTrace();
+
+            contasT = new HashSet<>();
+
+            // Ainda consigo otimizar isto
+            try {
+                for(String username : usernames) {
+                    Utilizador u = this.contas.getConta(username);
+                    contasT.add(u);
+                }
+                contasT.stream().sorted().forEach(u-> lm.lock(u, Mode.X));
+            } catch (UsernameNaoExistenteException e) {
+                e.printStackTrace();
+            }
+
+        } finally {
+            lm.unlock(contas);
         }
-        lm.unlock(contas);
+
         // Se calhar depois pode-se criar notificações
         for (Utilizador u : contasT) {
             for (Viagem viagem : viagensData)
                 u.removeReserva(viagem.codViagem);
-            System.out.println("Removi DIA do utilizador");
             lm.unlock(u);
         }
 
@@ -172,18 +184,22 @@ public class GestaoLN {
     public void cancelarReserva(String username, int codViagem) throws UsernameNaoExistenteException, VooIndisponivelException {
         lm.lock(voos, Mode.X);
         lm.lock(contas, Mode.X);
-        Utilizador u = contas.getConta(username);
-        lm.lock(u, Mode.X);
-        lm.unlock(contas);
-        Viagem v = voos.getViagem(codViagem);
-        lm.lock(v, Mode.X);
-        lm.unlock(voos);
+        Utilizador u = null;
+        Viagem v = null;
+        try {
+            u = contas.getConta(username);
+            v = voos.getViagem(codViagem);
+            lm.lock(v, Mode.X);
+            lm.lock(u, Mode.X);
+        } finally {
+            lm.unlock(voos);
+            lm.unlock(contas);
+        }
         for (int i = 0; i < u.reservas.size(); i++) {
             if (u.reservas.get(i) == codViagem) {
                 u.reservas.remove(i);
                 break;
             }
-
         }
         lm.unlock(u);
         v.reservas.remove(username);
@@ -204,9 +220,13 @@ public class GestaoLN {
 
     public Set<Map.Entry<Integer, Integer>> getReserves(String username) throws UsernameNaoExistenteException {
         lm.lock(contas, Mode.S);
-        Utilizador u = contas.getConta(username);
-        lm.lock(u, Mode.S);
-        lm.unlock(contas);
+        Utilizador u = null;
+        try {
+            u = contas.getConta(username);
+            lm.lock(u, Mode.S);
+        } finally {
+            lm.unlock(contas);
+        }
         Map<Integer, Integer> aux = new HashMap<>();
         Set<Map.Entry<Integer, Integer>> r = new HashSet<>();
         for (int codReserva : u.reservas) {
@@ -230,6 +250,7 @@ public class GestaoLN {
             for (Voo v2 : voos.voos.values()) {
                 for (Voo v3 : voos.voos.values()) {
                     if (!v1.equals(v2) && !v2.equals(v3) && voos.voosEscala(v1, v2,v3, origem, destino)) {
+                        System.out.println("ESCALA 2");
                         List<String> destinos = new ArrayList<>();
                         destinos.add(v1.destino);
                         destinos.add(v2.destino);
@@ -244,6 +265,7 @@ public class GestaoLN {
                 }
             }
         }
+
         lm.unlock(voos);
         return r;
     }

@@ -126,27 +126,32 @@ public class TerminalUI {
 
         // Get time interval
         System.out.print("\n" + Colors.ANSI_GREEN + "$"+Colors.ANSI_RESET+" day(start) > ");
-        int dayStart = scin.nextInt();
-        System.out.print(Colors.ANSI_GREEN + "$"+Colors.ANSI_RESET+" month(start) > ");
-        int monthStart = scin.nextInt();
+        String line = scin.nextLine();
+        int dayStart = Integer.parseInt(line);
+        System.out.print(Colors.ANSI_GREEN + "$"+Colors.ANSI_RESET+ " month(start) > ");
+        line = scin.nextLine();
+        int monthStart = Integer.parseInt(line);
         System.out.print(Colors.ANSI_GREEN + "$"+Colors.ANSI_RESET+" year(start) > ");
-        int yearStart = scin.nextInt();
+        line = scin.nextLine();
+        int yearStart = Integer.parseInt(line);
 
         LocalDateTime dateStart = LocalDateTime.of(yearStart,monthStart,dayStart,0,0);
 
         System.out.print(Colors.ANSI_GREEN + "$"+Colors.ANSI_RESET+" day(end) > ");
-        int dayEnd = scin.nextInt();
+        line = scin.nextLine();
+        int dayEnd = Integer.parseInt(line);
         System.out.print(Colors.ANSI_GREEN + "$"+Colors.ANSI_RESET+" month(end) > ");
-        int monthEnd = scin.nextInt();
+        line = scin.nextLine();
+        int monthEnd = Integer.parseInt(line);
         System.out.print(Colors.ANSI_GREEN + "$"+Colors.ANSI_RESET+" year(end) > ");
-        int yearEnd = scin.nextInt();
+        line = scin.nextLine();
+        int yearEnd = Integer.parseInt(line);
 
-        LocalDateTime dateEnd = LocalDateTime.of(yearStart,monthStart,dayStart,0,0);
+        LocalDateTime dateEnd = LocalDateTime.of(yearEnd,monthEnd,dayEnd,0,0);
 
         // Get places
         List<String> places = new ArrayList<>();
         System.out.print(Colors.ANSI_GREEN + "$"+Colors.ANSI_RESET+" origem > ");
-        scin.nextLine();
         String orig = scin.nextLine();
         //System.out.println("Origem escolhida:" + orig);
         places.add(orig);
@@ -156,14 +161,14 @@ public class TerminalUI {
         System.out.println(Colors.ANSI_YELLOW+" [1] NÃO" + Colors.ANSI_RESET);
         System.out.print(Colors.ANSI_GREEN+"$"+Colors.ANSI_RESET+" Opção > "+Colors.ANSI_RESET);
 
-        int opt = scin.nextInt();
+        line = scin.nextLine();
+        int opt = Integer.parseInt(line);
 
         int i = 1;
         if (opt == 0){
             boolean contin = true;
             while(contin) {
                 System.out.print(Colors.ANSI_GREEN + "$" + Colors.ANSI_RESET + " escala > ");
-                scin.nextLine();
                 String escala = scin.nextLine();
                 //System.out.println("Escala lida:" + escala);
                 places.add(escala);
@@ -173,14 +178,15 @@ public class TerminalUI {
                 System.out.println(Colors.ANSI_YELLOW+" [1] NÃO" + Colors.ANSI_RESET);
                 System.out.print(Colors.ANSI_GREEN+"$"+Colors.ANSI_RESET+" Opção > "+Colors.ANSI_RESET);
 
-                opt = scin.nextInt();
+
+                line = scin.nextLine();
+                opt = Integer.parseInt(line);
 
                 if (opt == 1) contin = false;
             }
         }
 
         System.out.print(Colors.ANSI_GREEN + "$"+Colors.ANSI_RESET+" destino > ");
-        scin.nextLine();
         String dest = scin.nextLine();
         //System.out.println("Destino lido: " + dest);
         places.add(dest);
@@ -205,7 +211,9 @@ public class TerminalUI {
     private void cancelReserveHandler(){
         // Get reserve code
         System.out.print("\n" + Colors.ANSI_GREEN + "$"+Colors.ANSI_RESET+" reserve code > ");
-        int reserveCode = scin.nextInt();
+
+        String line = scin.nextLine();
+        int reserveCode = Integer.parseInt(line);
         System.out.println("Reserve code lido:" + reserveCode);
 
         String token = Auth.getInstance().getToken();
@@ -297,11 +305,8 @@ public class TerminalUI {
         System.out.print(Colors.ANSI_GREEN + "$"+Colors.ANSI_RESET+" destino > ");
         String destin = scin.nextLine();
         System.out.print(Colors.ANSI_GREEN + "$"+Colors.ANSI_RESET+" capacidade > ");
-        Short capacity = scin.nextShort();
-
-        System.out.println("Orig:" + orig);
-        System.out.println("Dest:" + destin);
-        System.out.println("Capacity:" + capacity);
+        String line = scin.nextLine();
+        Short capacity = Short.parseShort(line);
 
         Auth auth = Auth.getInstance();
 
@@ -314,11 +319,14 @@ public class TerminalUI {
     }
     private void cancelDayHandler(){
         System.out.print("\n" + Colors.ANSI_GREEN + "$"+Colors.ANSI_RESET+" day(start) > ");
-        int day = scin.nextInt();
+        String line = scin.nextLine();
+        int day = Integer.parseInt(line);
         System.out.print(Colors.ANSI_GREEN + "$"+Colors.ANSI_RESET+" month(start) > ");
-        int month = scin.nextInt();
+        line = scin.nextLine();
+        int month = Integer.parseInt(line);
         System.out.print(Colors.ANSI_GREEN + "$"+Colors.ANSI_RESET+" year(start) > ");
-        int year = scin.nextInt();
+        line = scin.nextLine();
+        int year = Integer.parseInt(line);
         //scin.nextLine();
 
         LocalDateTime date = LocalDateTime.of(year,month,day,0,0);
