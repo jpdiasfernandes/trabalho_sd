@@ -158,5 +158,18 @@ public class VoosLN {
         return v;
     }
 
+    public boolean voosEscala(Voo v1 , Voo v2, Voo v3, String origem, String destino) {
+        return v1.origem.equals(origem)
+                && v1.destino.equals(v2.origem)
+                && v2.destino.equals(v3.origem)
+                && v3.destino.equals(destino);
+    }
+
+    public boolean voosEscala(Voo v1, Voo v2, String origem, String destino) {
+        return v1.origem.equals(origem)
+                && v1.destino.equals(v2.origem)
+                && v2.destino.equals(destino);
+    }
+
 
 }

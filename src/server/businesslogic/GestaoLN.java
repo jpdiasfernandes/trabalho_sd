@@ -223,6 +223,32 @@ public class GestaoLN {
         return r;
     }
 
+    public List<List<String>> getRoutes(String origem, String destino) {
+        List<List<String>> r = new ArrayList<>();
+        lm.lock(voos, Mode.S);
+        for (Voo v1 : voos.voos.values()) {
+            for (Voo v2 : voos.voos.values()) {
+                for (Voo v3 : voos.voos.values()) {
+                    if (!v1.equals(v2) && !v2.equals(v3) && voos.voosEscala(v1, v2,v3, origem, destino)) {
+                        List<String> destinos = new ArrayList<>();
+                        destinos.add(v1.destino);
+                        destinos.add(v2.destino);
+                        r.add(destinos);
+                    }
+
+                }
+                if (!v1.equals(v2) && voos.voosEscala(v1, v2, origem, destino)) {
+                    List<String> destinos = new ArrayList<>();
+                    destinos.add(v1.destino);
+                    r.add(destinos);
+                }
+            }
+        }
+        lm.unlock(voos);
+        return r;
+    }
+
+
 
 
 
