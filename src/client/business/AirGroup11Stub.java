@@ -317,8 +317,12 @@ public class AirGroup11Stub implements IAirGroup11 {
         Request request = new Request((byte) 0x7,data.length,data);
         Reply reply = demultiplexer.service(request);
 
-        ByteArrayInputStream bais = new ByteArrayInputStream(reply.getData());
-        DataInputStream dis = new DataInputStream(bais);
+        ByteArrayInputStream bais = null;
+        DataInputStream dis = null;
+        if (reply.getDataSize() > 0) {
+            bais = new ByteArrayInputStream(reply.getData());
+            dis = new DataInputStream(bais);
+        }
 
         if (reply.getError() == (byte) 0x0){
             String message = null;
@@ -332,22 +336,25 @@ public class AirGroup11Stub implements IAirGroup11 {
 
         try {
             int numberOfPlaces = dis.readInt();
+            System.out.println("Number of UTFS: " + numberOfPlaces);
 
             boolean readOrigin = false;
             boolean readDest = false;
 
-            String lastPlace = null;
+            String lastPlace = "";
             Route tmpRoute = new Route();
             List<Route> routes = new ArrayList<>();
 
             for (int i = 0; i < numberOfPlaces; i++){
 
                 String tmpPlace = dis.readUTF();
+                System.out.println("tmpPlace: " + tmpPlace);
 
                 if(tmpPlace.equals(orig)) readOrigin = true;
                 if(tmpPlace.equals(dest)) readDest = true;
 
-                if (lastPlace != null && readOrigin == false){
+                if (!lastPlace.equals("") && readOrigin == false){
+                    System.out.println("Vou criar voo");
                     Flight tmpFlight = new Flight(lastPlace,tmpPlace);
                     tmpRoute.insert(tmpFlight);
                 }
@@ -358,6 +365,8 @@ public class AirGroup11Stub implements IAirGroup11 {
                 }
 
                 lastPlace = tmpPlace;
+                readOrigin = false;
+                readDest = false;
             }
 
             return routes;

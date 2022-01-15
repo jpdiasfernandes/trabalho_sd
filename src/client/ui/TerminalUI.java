@@ -1,10 +1,7 @@
 package ui;
 
-import business.AirGroup11Stub;
-import business.Auth;
+import business.*;
 import business.Exceptions.*;
-import business.Flight;
-import business.IAirGroup11;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -125,7 +122,6 @@ public class TerminalUI {
 
     /* Regular client handlers */
 
-    // DONE
     private void reserveTravelHandler(){
 
         // Get time interval
@@ -206,7 +202,6 @@ public class TerminalUI {
 
         }).start();
     }
-    // DONE
     private void cancelReserveHandler(){
         // Get reserve code
         System.out.print("\n" + Colors.ANSI_GREEN + "$"+Colors.ANSI_RESET+" reserve code > ");
@@ -247,24 +242,37 @@ public class TerminalUI {
         System.out.print("\n" + Colors.ANSI_GREEN + "$"+Colors.ANSI_RESET+" origem > ");
         //scin.nextLine();
         String orig = scin.nextLine();
-        System.out.println("Orig lida:" + orig);
+        //System.out.println("Orig lida:" + orig);
         System.out.print(Colors.ANSI_GREEN + "$"+Colors.ANSI_RESET+" destino > ");
         //scin.nextLine();
         String dest = scin.nextLine();
-        System.out.println("Dest lido:" + dest);
+        //System.out.println("Dest lido:" + dest);
 
         String token = Auth.getInstance().getToken();
 
-        // invoke model
-        /*
         try {
-            model.getRoutes(token,orig,dest);
+            List<Route> routes = model.getRoutes(token,orig,dest);
+
+            int i = 0;
+            System.out.print("\n");
+            for(Route route: routes){
+                System.out.println(Colors.ANSI_PURPLE + "[" + i + "]" + Colors.ANSI_RESET + "Percurso: ");
+                int j = 0;
+                for (Flight flight: route.getRoute()) {
+                    System.out.println(
+                            Colors.ANSI_YELLOW + "(voo " + j + ") " +
+                                    Colors.ANSI_CYAN + "(Origem) " +
+                                    Colors.ANSI_RESET + flight.getOrig() +
+                                    " -> " + Colors.ANSI_CYAN + "(destino) " + Colors.ANSI_RESET + flight.getDest()
+                    );
+                    j++;
+                }
+                i++;
+            }
         } catch (GetRoutesException e) {
              System.out.println(Colors.ANSI_YELLOW + "[ERROR] " + Colors.ANSI_RESET + e.getMessage());
         }
-         */
     }
-    // DONE
     private void getMyReserversHandler(){
         Auth auth = Auth.getInstance();
 
@@ -311,6 +319,7 @@ public class TerminalUI {
         int month = scin.nextInt();
         System.out.print(Colors.ANSI_GREEN + "$"+Colors.ANSI_RESET+" year(start) > ");
         int year = scin.nextInt();
+        //scin.nextLine();
 
         LocalDateTime date = LocalDateTime.of(year,month,day,0,0);
 

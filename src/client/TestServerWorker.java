@@ -37,6 +37,7 @@ class TestServerWorker implements Runnable{
                 if (opcode == (byte)0x4) answerReserve(data,tag);
                 if (opcode == (byte)0x5) answerCancelReserve(data,tag);
                 if (opcode == (byte)0x6) answerAllFlights(data,tag);
+                if (opcode == (byte)0x7) answerRoutes(data,tag);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -208,6 +209,45 @@ class TestServerWorker implements Runnable{
         dos.writeUTF("Dubai");
         dos.writeUTF("Lisboa");
         dos.writeUTF("Porto");
+
+        Reply r = new Reply(
+                tag,
+                (byte) 0x1,
+                baos.toByteArray().length,
+                baos.toByteArray()
+        );
+
+        DataOutputStream dos2 = new DataOutputStream(s.getOutputStream());
+        System.out.println("Enviando a Reply...");
+        dos2.write(r.deserialize());
+        dos2.flush();
+        System.out.println("Reply foi enviada");
+    }
+    private void answerRoutes(byte[] data,Short tag) throws IOException {
+        System.out.println(Colors.ANSI_GREEN + "Foi detetado um Request de routes!" + Colors.ANSI_RESET);
+        // o que vem a seguir é feito caso for detetado o opcode de cancel reserve
+        DataInputStream dis = new DataInputStream(new ByteArrayInputStream(data));
+        String token = dis.readUTF();
+        String origin = dis.readUTF();
+        String dest = dis.readUTF();
+
+        System.out.println("Preparando a Reply...");
+
+        //String errorMessage = "Credenciais inválidas";
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        DataOutputStream dos = new DataOutputStream(baos);
+        //dos.writeUTF(errorMessage);
+        dos.writeInt(9);
+        dos.writeUTF(origin);
+        dos.writeUTF("Braga");
+        dos.writeUTF(dest);
+        dos.writeUTF(origin);
+        dos.writeUTF("Lisboa");
+        dos.writeUTF("Porto");
+        dos.writeUTF(dest);
+        dos.writeUTF(origin);
+        dos.writeUTF(dest);
 
         Reply r = new Reply(
                 tag,
