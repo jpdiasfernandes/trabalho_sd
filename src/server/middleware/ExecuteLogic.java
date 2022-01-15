@@ -196,7 +196,21 @@ public class ExecuteLogic implements Runnable{
                     }
                     break;
                 case(7):
-
+                    FrameAllVoos frameAllVoos = null;
+                    try {
+                        frameAllVoos = FrameAllVoos.deserialize(frame.data);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    List<List<String>> routes = gestaoLN.getRoutes(frameAllVoos.requestOrigem, frameAllVoos.requestDestino);
+                    frameAllVoos.initializeReply(routes);
+                    try {
+                        byte[] replyReply = frameAllVoos.serializeReply();
+                        ReplySerializerFrame r = new ReplySerializerFrame(frame.tag, (byte) 0x1, replyReply.length, replyReply);
+                        middleware.putResponse(r, id);
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
+                    }
                     break;
                 case(8):
                     FrameReservas frameReservas = null;
