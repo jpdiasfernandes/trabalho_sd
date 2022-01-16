@@ -99,7 +99,7 @@ class TestRunnable implements Runnable {
 }
 public class TestMultiThreading {
     public static void main(String []args) {
-        final int N = 150;
+        final int N = 281;
         Thread[] threads = new Thread[N];
         String username = "a";
         for(int i = 0; i < N; i++) {
