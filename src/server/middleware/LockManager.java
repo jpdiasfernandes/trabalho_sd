@@ -1,7 +1,7 @@
-package businesslogic;
+package middleware;
 
+import businesslogic.Mode;
 import businesslogic.excecoes.UnlockException;
-import businesslogic.excecoes.UnlockSemLockException;
 
 import java.util.*;
 import java.util.concurrent.locks.*;
@@ -295,11 +295,9 @@ public class LockManager {
 
     public void lock(Object obj, Mode mode) {
         l.lock();
-        System.out.println("LOCK MODE : " + mode);
         LockState ls = locks.get(obj);
         if (ls == null) {
             ls = new LockState();
-            System.out.println("Criei LS");
             locks.put(obj, ls);
         }
 
@@ -315,7 +313,6 @@ public class LockManager {
             default:
                 break;
         }
-        System.out.println("locked");
     }
 
     public void unlock(Object obj) {
@@ -327,7 +324,6 @@ public class LockManager {
             locks.remove(ls);
         }
 
-        System.out.println("MODE : " + mode);
         l.unlock();
         switch (mode) {
             case S :
@@ -341,6 +337,5 @@ public class LockManager {
 
         }
 
-        System.out.println("Unlocked");
     }
 }

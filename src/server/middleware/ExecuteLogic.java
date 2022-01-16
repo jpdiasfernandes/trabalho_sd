@@ -12,10 +12,10 @@ import java.util.stream.Collectors;
 
 
 public class ExecuteLogic implements Runnable{
-    private  Middleware middleware;
+    private  IMiddleware middleware;
     private GestaoLN gestaoLN;
 
-    public ExecuteLogic(Middleware middleware, GestaoLN gestaoLN) {
+    public ExecuteLogic(IMiddleware middleware, GestaoLN gestaoLN) {
         this.middleware = middleware;
         this.gestaoLN = gestaoLN;
     }
@@ -29,7 +29,6 @@ public class ExecuteLogic implements Runnable{
             switch (frame.opCode){
                 case(0):
                     FrameRegisto frameRegisto = null;
-                    System.out.println("Detectei opcode de registo");
                     try {
                         frameRegisto = FrameRegisto.deserialize(frame.data);
                     } catch (IOException e) {
@@ -37,13 +36,10 @@ public class ExecuteLogic implements Runnable{
                     }
                     try{
                         gestaoLN.registarUtilizador(frameRegisto.requestUsername,frameRegisto.requestPwd);
-                        System.out.println("Registei");
                         ReplySerializerFrame r = new ReplySerializerFrame(frame.tag, (byte) 0x1, 0, null);
-                        System.out.println("Vou colocar na Response");
                         middleware.putResponse(r, id);
                     }catch (UsernameExistenteException e){
                         frameRegisto.initializeError(e.getLocalizedMessage());
-                        System.out.println("Já existe");
                         try {
                             byte[] replyError = frameRegisto.serializeError();
                             ReplySerializerFrame r = new ReplySerializerFrame(frame.tag, (byte) 0x0, replyError.length, replyError);
@@ -55,7 +51,6 @@ public class ExecuteLogic implements Runnable{
                     break;
                 case(1):
                     FrameLogin frameLogin = null;
-                    System.out.println("Detectei opcode de login");
                     try {
                         frameLogin = FrameLogin.deserialize(frame.data);
                     } catch (IOException e) {
@@ -64,7 +59,6 @@ public class ExecuteLogic implements Runnable{
                     try{
                         gestaoLN.validarUtilizador(frameLogin.requestUsername,frameLogin.requestPwd);
                         boolean admin = gestaoLN.admin(frameLogin.requestUsername);
-                        System.out.println("É admin " + admin);
                         frameLogin.initializeReply(middleware.putToken(frameLogin.requestUsername,frameLogin.requestPwd), admin);
                         try {
                             byte[] replyReply = frameLogin.serializeReply();

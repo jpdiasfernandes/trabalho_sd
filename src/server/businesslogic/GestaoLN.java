@@ -1,20 +1,22 @@
 package businesslogic;
 
 import businesslogic.excecoes.*;
-import jdk.jshell.execution.Util;
+import middleware.LockManager;
 
 import java.time.LocalDate;
 import java.util.*;
 
 public class GestaoLN {
-    LockManager lm = new LockManager();
+    LockManager lm;
     public ContasLN contas = new ContasLN();
     public VoosLN voos = new VoosLN();
 
+    public GestaoLN(LockManager lm) {
+        this.lm = lm;
+    }
+
     public void registarUtilizador(String username, String pwd) throws UsernameExistenteException {
-        lm.lock(this, Mode.X);
         lm.lock(contas, Mode.X);
-        lm.unlock(this);
         try {
            if(contas.contas.containsKey(username)) throw new UsernameExistenteException("Username " + username + " já existente");
            Utilizador u = new Utilizador(username, pwd);
@@ -27,9 +29,7 @@ public class GestaoLN {
 
 
     public boolean validarUtilizador(String username, String pwd) throws UsernameNaoExistenteException, PasswordErradaException {
-        lm.lock(this, Mode.S);
         lm.lock(contas, Mode.S);
-        lm.unlock(this);
         Utilizador u = contas.contas.get(username);
         if (u != null) lm.lock(u, Mode.S);
         lm.unlock(contas);
@@ -45,14 +45,9 @@ public class GestaoLN {
 
     public void insercaoVoo(String username, String origem, String destino, int capacidade)
             throws NaoTemPermissaoException, UsernameNaoExistenteException {
-        lm.lock(this, Mode.X);
-        try {
-            if (!admin(username)) throw new NaoTemPermissaoException("Username " + username + " não tem permissão para" +
-                    " inserir um voo");
-            lm.lock(voos, Mode.X);
-        } finally {
-            lm.unlock(this);
-        }
+        if (!admin(username)) throw new NaoTemPermissaoException("Username " + username + " não tem permissão para" +
+                " inserir um voo");
+        lm.lock(voos, Mode.X);
         Voo v = new Voo(origem, destino, capacidade);
         voos.voos.put(Map.entry(origem, destino), v);
 
@@ -75,10 +70,9 @@ public class GestaoLN {
 
     public void reservarVoo(String username, LocalDate data, String origem, String destino)
             throws UsernameNaoExistenteException, VooIndisponivelException {
-        lm.lock(this, Mode.X);
+        // O lock voos e contas é feito sempre por esta ordem
         lm.lock(voos, Mode.X);
         lm.lock(contas, Mode.X);
-        lm.unlock(this);
 
         Viagem v;
         Integer codViagem;
@@ -250,7 +244,6 @@ public class GestaoLN {
             for (Voo v2 : voos.voos.values()) {
                 for (Voo v3 : voos.voos.values()) {
                     if (!v1.equals(v2) && !v2.equals(v3) && voos.voosEscala(v1, v2,v3, origem, destino)) {
-                        System.out.println("ESCALA 2");
                         List<String> destinos = new ArrayList<>();
                         destinos.add(v1.destino);
                         destinos.add(v2.destino);

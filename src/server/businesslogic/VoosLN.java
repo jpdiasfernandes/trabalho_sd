@@ -87,13 +87,11 @@ public class VoosLN {
         List<Map.Entry<String, String>> pairs = new ArrayList<>();
         String last = destinos.remove(0);
         int size = destinos.size();
-        System.out.println("SIZE LIST : " + size);
         for (int i = 0; i < size; i++) {
             String destino = destinos.remove(0);
             pairs.add(Map.entry(last, destino));
             last = destino;
         }
-        System.out.println("SIZE LIST AFTER : " + pairs.size());
         return pairs;
     }
 
@@ -149,7 +147,6 @@ public class VoosLN {
             voosData = datasVoos.get(data);
         }
         if ((codViagem = voosData.get(origemDestino)) == null) {
-            System.out.println("Estou a criar um novo dia de viagens");
             v = new Viagem(voos.get(origemDestino), data);
             viagens.put(v.codViagem, v);
             voosData.put(origemDestino, v.codViagem);

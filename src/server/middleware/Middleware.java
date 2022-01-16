@@ -1,17 +1,14 @@
 package middleware;
 
-import businesslogic.LockManager;
-import businesslogic.Mode;
 import frames.ReplySerializerFrame;
 import frames.SerializerFrame;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class Middleware {
+public class Middleware implements IMiddleware {
     public BoundedBuffer<Map.Entry<Integer, SerializerFrame>> workersBuffer;
     public HashMap<Integer, BoundedBuffer<ReplySerializerFrame>> responseMap;
     public HashMap<String,String> tokens; //token,username
@@ -89,5 +86,9 @@ public class Middleware {
             e.printStackTrace();
             return null;
         }
+    }
+
+    public LockManager newLockManager() {
+        return new LockManager();
     }
 }

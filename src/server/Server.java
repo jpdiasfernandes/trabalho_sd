@@ -1,5 +1,6 @@
 import businesslogic.GestaoLN;
 import middleware.ExecuteLogic;
+import middleware.IMiddleware;
 import middleware.Middleware;
 import middleware.Session;
 
@@ -11,8 +12,8 @@ public class Server {
     public static void main(String[] args) {
         final int W = 150;
         Thread workers[] = new Thread[W];
-        Middleware mdl = new Middleware();
-        GestaoLN gestao = new GestaoLN();
+        IMiddleware mdl = new Middleware();
+        GestaoLN gestao = new GestaoLN(mdl.newLockManager());
         for (int i = 0; i < W; i++) {
             workers[i] = new Thread(new ExecuteLogic(mdl, gestao));
         }

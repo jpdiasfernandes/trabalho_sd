@@ -17,10 +17,10 @@ class ServeState {
 public class Session {
     private static final AtomicInteger count = new AtomicInteger(0);
     private final int sessionID;
-    private final Middleware mdl;
+    private final IMiddleware mdl;
     private final Socket socket;
 
-    public Session(Middleware mdl, Socket socket) {
+    public Session(IMiddleware mdl, Socket socket) {
         sessionID = count.getAndIncrement();
         this.mdl = mdl;
         this.socket = socket;
@@ -52,7 +52,6 @@ public class Session {
                 l.lock();
                 if (req == null) {
                     ss.running = false;
-                    System.out.println("Deu falso");
                 }
                 l.unlock();
             }
@@ -61,7 +60,6 @@ public class Session {
 
         // Receber replies
         new Thread(()-> {
-            System.out.println("Fiz lock");
             try {
                 // Ainda poderá haver mais requests
                 // OU já não há mais novos requests mas ainda é preciso receber
@@ -69,15 +67,11 @@ public class Session {
                 l.lock();
                 while(ss.running || ss.current != 0) {
                     while(ss.current == 0 && ss.running == true) {
-                        System.out.println("Vou adormecer");
                         c.await();
                     }
 
-                    System.out.println("Me acordaram");
                     if (ss.current != 0 || ss.running == true) {
-                        System.out.println("Vou fazer o Retrieve");
                         ReplySerializerFrame reply = mdl.retrieve(sessionID);
-                        System.out.println("Vou enviar reply");
                         ser.send(reply);
                         ss.current--;
                     }
